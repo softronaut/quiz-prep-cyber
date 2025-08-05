@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Sécurité et Réseaux</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Conteneur principal du quiz -->
+    <div id="quiz-container" class="bg-gray-800 p-8 md:p-12 rounded-2xl shadow-2xl max-w-6xl w-full">
+        <!-- En-tête du quiz -->
+        <h1 class="text-3xl md:text-4xl font-bold text-center mb-6 text-indigo-400">
+        Quiz sur la sécurité et les réseaux partie 2
+        </h1>
+        <div class="flex justify-between items-center mb-6 text-lg font-medium">
+           <a class="btn bg-orange-600 hover:bg-indigo-700 text-white font-bold py-2 px-3 rounded-full shadow-lg transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed" href="quiz_cyber.html">Aller à la partie 1</a>
+           
+            <div>
+                  <span id="score-display">Score: 0</span>
+                  <span id="question-count-display">Question 1/10</span>
+            </div>
+        </div>
+
+        <!-- Section de la question -->
+        <div id="question-section" class="mb-6">
+            <p id="question-text" class="text-xl md:text-2xl font-semibold mb-4">Texte de la question</p>
+            <div id="answer-buttons" class="grid gap-4">
+                <!-- Les boutons de réponse seront injectés ici par JavaScript -->
+            </div>
+        </div>
+
+        <!-- Section de feedback -->
+        <div id="feedback-section" class="hidden mt-6">
+            <p id="feedback-text" class="text-lg font-medium mb-2"></p>
+            <p id="rationale-text" class="text-md leading-relaxed"></p>
+        </div>
+
+        <!-- Bouton de navigation -->
+        <div class="mt-8 flex justify-end">
+               
+            <button id="next-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed">Suivant</button>
+        </div>
+    </div>
+
+    <!-- Modale de fin de quiz -->
+    <div id="end-quiz-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden">
+        <div class="bg-gray-800 p-8 md:p-12 rounded-2xl shadow-2xl max-w-md w-full text-center">
+            <h2 class="text-3xl font-bold text-indigo-400 mb-4">Quiz Terminé !</h2>
+            <p id="final-score" class="text-2xl mb-4">Votre score final est de: 0/10</p>
+            <button id="restart-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-colors duration-300">Recommencer</button>
+        </div>
+    </div>
+
+    <script>
+        // Tableau de questions, réponses et justifications
+        const questions = [
+  {
+    "question": "Qu'est-ce qu'une adresse IP ?",
+    "answerOptions": [
+      "Une étiquette numérique qui identifie de manière unique un périphérique sur un réseau.",
+      "Un nom de domaine pour un site web.",
+      "Un identifiant de matériel pour un périphérique réseau.",
+      "Le nom d'utilisateur et le mot de passe d'un routeur."
+    ],
+    "correctAnswer": "Une étiquette numérique qui identifie de manière unique un périphérique sur un réseau.",
+    "rationale": "Une adresse IP (Internet Protocol) est une étiquette numérique qui est attribuée de manière unique à chaque périphérique participant à un réseau informatique utilisant le protocole Internet pour la communication."
+  },
+  {
+    "question": "Combien de bits compose une adresse IPv6 ?",
+    "answerOptions": [
+      "32",
+      "64",
+      "128",
+      "256"
+    ],
+    "correctAnswer": "128",
+    "rationale": "Une adresse IPv6 est composée de 128 bits, ce qui lui permet de fournir un nombre d'adresses beaucoup plus important que l'IPv4, qui est limité à 32 bits."
+  },
+  {
+    "question": "Quel protocole est utilisé pour les pages web non sécurisées ?",
+    "answerOptions": [
+      "HTTPS",
+      "FTP",
+      "HTTP",
+      "SMTP"
+    ],
+    "correctAnswer": "HTTP",
+    "rationale": "Le protocole HTTP (Hypertext Transfer Protocol) est la base de la communication de données pour le World Wide Web, mais il ne fournit aucune sécurité ni chiffrement, ce qui le rend non sécurisé pour les informations sensibles."
+  },
+  {
+    "question": "Quel est l'objectif principal de la commande 'ping' ?",
+    "answerOptions": [
+      "Détecter les paquets malveillants.",
+      "Tester la connectivité entre deux périphériques sur un réseau IP.",
+      "Lister les fichiers sur un serveur distant.",
+      "Configurer les paramètres du routeur."
+    ],
+    "correctAnswer": "Tester la connectivité entre deux périphériques sur un réseau IP.",
+    "rationale": "La commande 'ping' est un utilitaire de diagnostic de réseau qui permet de tester si un hôte cible est accessible sur un réseau IP et de mesurer le temps d'aller-retour des paquets."
+  },
+  {
+    "question": "Quel est l'objectif principal de la commande 'tracert' (ou 'traceroute') ?",
+    "answerOptions": [
+      "Tester la connectivité entre deux périphériques.",
+      "Afficher l'itinéraire qu'un paquet prend pour atteindre sa destination.",
+      "Vérifier la configuration du pare-feu.",
+      "Analyser le trafic réseau en temps réel."
+    ],
+    "correctAnswer": "Afficher l'itinéraire qu'un paquet prend pour atteindre sa destination.",
+    "rationale": "La commande 'tracert' (ou 'traceroute' sur les systèmes UNIX) est utilisée pour afficher le chemin d'un paquet de données vers sa destination, en montrant chaque routeur intermédiaire (saut) sur son passage."
+  },
+  {
+    "question": "Qu'est-ce qu'un pare-feu ?",
+    "answerOptions": [
+      "Un type de routeur.",
+      "Un logiciel qui protège contre les virus.",
+      "Un périphérique de sécurité qui contrôle le trafic réseau entrant et sortant.",
+      "Une base de données d'adresses IP."
+    ],
+    "correctAnswer": "Un périphérique de sécurité qui contrôle le trafic réseau entrant et sortant.",
+    "rationale": "Un pare-feu est un système de sécurité réseau qui surveille et contrôle le trafic réseau entrant et sortant en fonction de règles de sécurité prédéfinies."
+  },
+  {
+    "question": "Quelle est la principale différence entre une ACL standard et une ACL étendue ?",
+    "answerOptions": [
+      "Les ACL étendues sont plus faciles à configurer.",
+      "Les ACL étendues ne peuvent pas filtrer le trafic par port.",
+      "Les ACL étendues permettent de filtrer le trafic en fonction des adresses source et de destination, des ports et des protocoles.",
+      "Les ACL étendues ne sont utilisées que sur les routeurs."
+    ],
+    "correctAnswer": "Les ACL étendues permettent de filtrer le trafic en fonction des adresses source et de destination, des ports et des protocoles.",
+    "rationale": "La principale différence est que les ACL étendues offrent un filtrage plus granulaire et précis en utilisant des critères supplémentaires tels que l'adresse IP de destination, le protocole (TCP, UDP, etc.) et les numéros de port."
+  },
+  {
+    "question": "Qu'est-ce que la fibre optique ?",
+    "answerOptions": [
+      "Un type de câble en cuivre.",
+      "Un support réseau qui transmet des données sous forme de signaux lumineux.",
+      "Un protocole de réseau sans fil.",
+      "Un logiciel de configuration de réseau."
+    ],
+    "correctAnswer": "Un support réseau qui transmet des données sous forme de signaux lumineux.",
+    "rationale": "La fibre optique est un support de transmission qui utilise des impulsions de lumière pour transmettre des données à travers des brins de verre ou de plastique. Elle est connue pour sa grande bande passante et sa faible atténuation."
+  },
+  {
+    "question": "Pourquoi une adresse IP est-elle attribuée à l'interface de gestion d'un commutateur de couche 2 ?",
+    "answerOptions": [
+      "Pour permettre au commutateur de router les paquets.",
+      "Pour que le commutateur puisse communiquer avec d'autres périphériques de couche 2.",
+      "Pour permettre la gestion à distance du commutateur (Telnet, SSH).",
+      "Pour augmenter le débit du réseau."
+    ],
+    "correctAnswer": "Pour permettre la gestion à distance du commutateur (Telnet, SSH).",
+    "rationale": "Les commutateurs de couche 2 n'ont pas besoin d'une adresse IP pour leur fonction principale de transfert de trames. L'adresse IP sur l'interface de gestion (généralement un VLAN) est spécifiquement utilisée pour l'accès et la configuration à distance par les administrateurs."
+  },
+  {
+    "question": "Quel est le protocole de sécurisation de la couche transport le plus couramment utilisé pour le trafic web ?",
+    "answerOptions": [
+      "SSL",
+      "TLS",
+      "HTTPS",
+      "TCP"
+    ],
+    "correctAnswer": "TLS",
+    "rationale": "TLS (Transport Layer Security) est le successeur de SSL (Secure Sockets Layer) et est le protocole de chiffrement standard utilisé pour sécuriser les communications sur Internet, en particulier le trafic web via HTTPS."
+  },
+  {
+    "question": "Quel terme décrit le concept de protection des données et des systèmes informatiques à travers plusieurs couches de sécurité ?",
+    "answerOptions": [
+      "Sécurité monocouche",
+      "Défense en profondeur",
+      "Pare-feu en cascade",
+      "Configuration ACL"
+    ],
+    "correctAnswer": "Défense en profondeur",
+    "rationale": "La 'défense en profondeur' est une stratégie de sécurité qui utilise une approche multicouche, où plusieurs mécanismes de sécurité sont mis en œuvre pour protéger les informations. Si une couche de sécurité échoue, une autre est en place pour la soutenir."
+  },
+  {
+    "question": "Quel protocole est utilisé pour transférer des fichiers entre un client et un serveur ?",
+    "answerOptions": [
+      "HTTP",
+      "FTP",
+      "SMTP",
+      "ICMP"
+    ],
+    "correctAnswer": "FTP",
+    "rationale": "FTP (File Transfer Protocol) est un protocole de communication standard utilisé pour le transfert de fichiers informatiques d'un serveur à un client sur un réseau informatique."
+  },
+  {
+    "question": "Comment un pare-feu sans état gère-t-il le trafic ?",
+    "answerOptions": [
+      "Il examine chaque paquet individuellement sans tenir compte du contexte.",
+      "Il analyse le contenu des paquets pour détecter les virus.",
+      "Il maintient une table des connexions actives.",
+      "Il refuse tout le trafic entrant par défaut."
+    ],
+    "correctAnswer": "Il examine chaque paquet individuellement sans tenir compte du contexte.",
+    "rationale": "Un pare-feu sans état (stateless) traite chaque paquet comme s'il était indépendant, sans aucune connaissance des paquets précédents ou de l'état de la connexion. C'est pour cette raison qu'il est rapide et a un faible impact sur les performances."
+  },
+  {
+    "question": "Quelle est l'un des avantages de l'utilisation de la fibre optique par rapport au câble en cuivre ?",
+    "answerOptions": [
+      "Coût d'installation plus faible.",
+      "Moins sensible aux interférences électromagnétiques.",
+      "Facile à connecter et à installer.",
+      "Moins de bande passante."
+    ],
+    "correctAnswer": "Moins sensible aux interférences électromagnétiques.",
+    "rationale": "La fibre optique utilise des signaux lumineux pour transmettre les données, ce qui la rend insensible aux interférences électromagnétiques (EMI), contrairement aux câbles en cuivre qui peuvent être affectés par ces interférences."
+  },
+  {
+    "question": "Quel est le rôle d'un routeur dans un réseau ?",
+    "answerOptions": [
+      "Connecter des périphériques au même réseau local.",
+      "Fournir une alimentation électrique aux périphériques.",
+      "Acheminer des paquets de données entre des réseaux différents.",
+      "Filtrer les adresses MAC."
+    ],
+    "correctAnswer": "Acheminer des paquets de données entre des réseaux différents.",
+    "rationale": "Un routeur est un périphérique de couche 3 (réseau) dont la fonction principale est de diriger le trafic entre différents réseaux, en utilisant des adresses IP pour prendre des décisions de routage."
+  },
+  {
+    "question": "Qu'est-ce qu'une ACL (Access Control List) ?",
+    "answerOptions": [
+      "Une liste de commandes pour les routeurs.",
+      "Une série de règles qui contrôlent le trafic réseau.",
+      "Un protocole de routage.",
+      "Un type de pare-feu."
+    ],
+    "correctAnswer": "Une série de règles qui contrôlent le trafic réseau.",
+    "rationale": "Une ACL est un ensemble de règles qui sont appliquées à un routeur ou à un commutateur pour filtrer le trafic réseau et déterminer quels paquets sont autorisés à passer ou doivent être bloqués."
+  },
+  {
+    "question": "Quel protocole permet au navigateur web de communiquer de manière sécurisée avec le serveur web ?",
+    "answerOptions": [
+      "FTP",
+      "TCP/IP",
+      "HTTPS",
+      "Telnet"
+    ],
+    "correctAnswer": "HTTPS",
+    "rationale": "HTTPS (Hypertext Transfer Protocol Secure) est la version sécurisée de HTTP. Il utilise le chiffrement pour protéger les communications entre le client (navigateur) et le serveur, ce qui le rend essentiel pour les sites web nécessitant une sécurité, comme les sites de commerce électronique et les services bancaires en ligne."
+  },
+  {
+    "question": "Quel est l'un des principaux avantages du 'pare-feu de politique basé sur les zones' ?",
+    "answerOptions": [
+      "Il simplifie la configuration en regroupant les interfaces dans des zones de sécurité.",
+      "Il ne prend en charge que les ACL standard.",
+      "Il est le plus rapide de tous les pare-feux.",
+      "Il n'est pas compatible avec les routeurs Cisco."
+    ],
+    "correctAnswer": "Il simplifie la configuration en regroupant les interfaces dans des zones de sécurité.",
+    "rationale": "Un pare-feu de politique basé sur les zones (ZPF) simplifie la gestion de la sécurité en permettant à l'administrateur de définir des politiques de sécurité entre des groupes d'interfaces (appelés 'zones'), plutôt que de configurer des règles pour chaque interface individuellement."
+  },
+  {
+    "question": "Qu'est-ce qu'un ver informatique ?",
+    "answerOptions": [
+      "Un programme qui se propage en se liant à d'autres programmes.",
+      "Un logiciel qui enregistre les frappes au clavier.",
+      "Un malware qui se réplique et se propage de manière autonome sur un réseau.",
+      "Un logiciel qui affiche des publicités indésirables."
+    ],
+    "correctAnswer": "Un malware qui se réplique et se propage de manière autonome sur un réseau.",
+    "rationale": "Contrairement à un virus qui a besoin d'un programme hôte pour se propager, un ver est un type de malware qui se réplique et se diffuse de manière autonome à travers les vulnérabilités du réseau."
+  },
+  {
+    "question": "Quel est le but d'un logiciel antimalware ?",
+    "answerOptions": [
+      "Améliorer les performances du réseau.",
+      "Empêcher les intrusions externes dans le réseau.",
+      "Détecter, empêcher et supprimer les logiciels malveillants.",
+      "Gérer les adresses IP sur le réseau."
+    ],
+    "correctAnswer": "Détecter, empêcher et supprimer les logiciels malveillants.",
+    "rationale": "Un logiciel antimalware (antivirus) est un programme conçu pour protéger un ordinateur contre les logiciels malveillants tels que les virus, les vers, les chevaux de Troie et les rançongiciels en les détectant, les empêchant et les supprimant."
+  },
+  {
+    "question": "Quelle est la principale fonction d'un commutateur de couche 2 ?",
+    "answerOptions": [
+      "Acheminer le trafic entre différents réseaux IP.",
+      "Connecter des périphériques au sein du même réseau local (LAN).",
+      "Filtrer le trafic par adresses IP.",
+      "Fournir une connectivité sans fil."
+    ],
+    "correctAnswer": "Connecter des périphériques au sein du même réseau local (LAN).",
+    "rationale": "Un commutateur de couche 2 fonctionne au niveau de la couche liaison de données du modèle OSI. Sa fonction principale est d'interconnecter des périphériques sur le même réseau local en utilisant leurs adresses MAC pour prendre des décisions de transfert."
+  },
+  {
+    "question": "Qu'est-ce qu'un VLAN ?",
+    "answerOptions": [
+      "Un type de câble réseau.",
+      "Un réseau local virtuel qui segmente un réseau physique.",
+      "Un protocole de routage.",
+      "Une adresse IP spéciale."
+    ],
+    "correctAnswer": "Un réseau local virtuel qui segmente un réseau physique.",
+    "rationale": "Un VLAN (Virtual Local Area Network) est une méthode pour créer des réseaux logiques (virtuels) à partir d'un seul réseau physique. Cela permet de regrouper des périphériques en segments logiques, indépendamment de leur emplacement physique."
+  },
+  {
+    "question": "Quel protocole est responsable de la transmission des messages d'erreur et des informations de diagnostic sur les réseaux IP ?",
+    "answerOptions": [
+      "TCP",
+      "UDP",
+      "ICMP",
+      "ARP"
+    ],
+    "correctAnswer": "ICMP",
+    "rationale": "ICMP (Internet Control Message Protocol) est un protocole de la suite TCP/IP utilisé par les périphériques réseau (comme les routeurs et les hôtes) pour envoyer des messages d'erreur et des informations de diagnostic. La commande 'ping' est basée sur ICMP."
+  },
+  {
+    "question": "Quel est le but d'un pare-feu dynamique (stateful firewall) ?",
+    "answerOptions": [
+      "Filtrer uniquement le trafic entrant.",
+      "Filtrer le trafic en se basant sur l'état de la connexion.",
+      "Filtrer le trafic sans aucune règle.",
+      "Filtrer le trafic en se basant uniquement sur l'adresse IP source."
+    ],
+    "correctAnswer": "Filtrer le trafic en se basant sur l'état de la connexion.",
+    "rationale": "Un pare-feu dynamique (stateful) est capable de maintenir un état des connexions réseau. Il est plus intelligent qu'un pare-feu sans état car il peut déterminer si un paquet entrant est une réponse légitime à une connexion sortante, ce qui améliore la sécurité."
+  },
+  {
+    "question": "Quel est l'un des principaux rôles de l'adresse MAC (Media Access Control) ?",
+    "answerOptions": [
+      "Identifier un périphérique de manière logique sur un réseau.",
+      "Identifier de manière unique la carte réseau d'un périphérique.",
+      "Acheminer les paquets entre des réseaux différents.",
+      "Crypter les données."
+    ],
+    "correctAnswer": "Identifier de manière unique la carte réseau d'un périphérique.",
+    "rationale": "L'adresse MAC est une adresse physique unique qui est gravée dans la carte réseau (NIC) par le fabricant. Elle est utilisée pour identifier de manière unique un périphérique sur un segment de réseau local (couche 2)."
+  },
+  {
+    "question": "Quel type de câble réseau est le plus couramment utilisé pour les connexions Ethernet sur un réseau local ?",
+    "answerOptions": [
+      "Câble coaxial",
+      "Câble téléphonique",
+      "Paire torsadée (Twisted Pair)",
+      "Fibre optique monomode"
+    ],
+    "correctAnswer": "Paire torsadée (Twisted Pair)",
+    "rationale": "Le câble à paires torsadées (comme le Cat5e, Cat6) est le type de câble le plus répandu pour les réseaux Ethernet locaux en raison de son coût relativement faible, de sa facilité d'installation et de ses performances adaptées à la plupart des besoins."
+  },
+  {
+    "question": "Qu'est-ce qu'une attaque par déni de service (DoS) ?",
+    "answerOptions": [
+      "Une attaque qui vole des informations personnelles.",
+      "Une attaque qui rend un service ou un site web inaccessible en le submergeant de trafic.",
+      "Une attaque qui installe un virus sur un ordinateur.",
+      "Une attaque qui modifie les paramètres du routeur."
+    ],
+    "correctAnswer": "Une attaque qui rend un service ou un site web inaccessible en le submergeant de trafic.",
+    "rationale": "Une attaque par déni de service (Denial of Service) vise à rendre un service indisponible en saturant ses ressources (bande passante, processeur) avec un flux de trafic massif, empêchant les utilisateurs légitimes d'y accéder."
+  },
+  {
+    "question": "Quel est l'avantage principal d'un commutateur de couche 3 par rapport à un commutateur de couche 2 ?",
+    "answerOptions": [
+      "Un commutateur de couche 3 est plus rapide.",
+      "Un commutateur de couche 3 peut router le trafic entre différents VLANs (routage inter-VLAN).",
+      "Un commutateur de couche 3 est moins cher.",
+      "Un commutateur de couche 3 utilise uniquement des adresses MAC."
+    ],
+    "correctAnswer": "Un commutateur de couche 3 peut router le trafic entre différents VLANs (routage inter-VLAN).",
+    "rationale": "Un commutateur de couche 3 combine les fonctions d'un commutateur de couche 2 (commutation) et d'un routeur (routage). Il est capable de diriger le trafic entre différents VLANs, une fonction appelée routage inter-VLAN, ce qui n'est pas possible avec un simple commutateur de couche 2."
+  },
+  {
+    "question": "Qu'est-ce qu'un système de détection d'intrusion (IDS) ?",
+    "answerOptions": [
+      "Un logiciel qui bloque les menaces avant qu'elles n'atteignent le réseau.",
+      "Un logiciel qui surveille le réseau pour détecter les activités malveillantes.",
+      "Un périphérique qui attribue des adresses IP.",
+      "Un logiciel qui gère la bande passante."
+    ],
+    "correctAnswer": "Un logiciel qui surveille le réseau pour détecter les activités malveillantes.",
+    "rationale": "Un système de détection d'intrusion (Intrusion Detection System, IDS) est un système qui surveille le trafic réseau pour identifier les activités suspectes ou malveillantes. Il ne bloque pas activement le trafic, mais alerte l'administrateur en cas d'activité anormale."
+  },
+  {
+    "question": "Quel est le nom du système de noms de domaine qui traduit les noms de domaine en adresses IP ?",
+    "answerOptions": [
+      "DNS",
+      "DHCP",
+      "FTP",
+      "HTTP"
+    ],
+    "correctAnswer": "DNS",
+    "rationale": "Le DNS (Domain Name System) est un service de nommage distribué pour les réseaux informatiques. Sa fonction principale est de traduire les noms de domaine lisibles par l'homme (par exemple, www.google.com) en adresses IP numériques (par exemple, 142.250.187.164) que les ordinateurs peuvent utiliser."
+  },
+  {
+    "question": "Comment s'appelle le type d'attaque où un attaquant se fait passer pour un autre utilisateur ou périphérique pour accéder à des ressources réseau ?",
+    "answerOptions": [
+      "Phishing",
+      "Spoofing",
+      "Déni de service",
+      "Attaque par force brute"
+    ],
+    "correctAnswer": "Spoofing",
+    "rationale": "Le spoofing (usurpation) est une technique où un attaquant falsifie l'identité d'un autre utilisateur, d'un périphérique ou d'un service pour tromper les systèmes de sécurité. L'usurpation d'adresses IP ou d'adresses MAC en sont des exemples courants."
+  },
+  {
+    "question": "Quelle couche du modèle OSI est responsable de la transmission des bits bruts sur le support physique ?",
+    "answerOptions": [
+      "Couche physique (1)",
+      "Couche liaison de données (2)",
+      "Couche réseau (3)",
+      "Couche transport (4)"
+    ],
+    "correctAnswer": "Couche physique (1)",
+    "rationale": "La couche physique (couche 1) du modèle OSI est la plus basse couche et est responsable de la transmission des bits de données bruts sur un support physique, comme un câble ou une onde radio."
+  },
+  {
+    "question": "Quel est le but d'un routeur sans fil ?",
+    "answerOptions": [
+      "Connecter des périphériques filaires entre eux.",
+      "Transmettre des données via un réseau cellulaire.",
+      "Connecter des périphériques au réseau en utilisant le Wi-Fi et les relier à Internet.",
+      "Gérer les adresses MAC."
+    ],
+    "correctAnswer": "Connecter des périphériques au réseau en utilisant le Wi-Fi et les relier à Internet.",
+    "rationale": "Un routeur sans fil combine les fonctions d'un routeur, d'un point d'accès sans fil et souvent d'un commutateur et d'un pare-feu. Il permet aux périphériques sans fil de se connecter au réseau et achemine le trafic vers et depuis Internet."
+  },
+  {
+    "question": "Quel est un exemple de malware qui se masque en tant que programme légitime ?",
+    "answerOptions": [
+      "Ver",
+      "Virus",
+      "Cheval de Troie",
+      "Ransomware"
+    ],
+    "correctAnswer": "Cheval de Troie",
+    "rationale": "Un cheval de Troie est un type de malware qui se déguise en un logiciel inoffensif et légitime pour inciter l'utilisateur à l'exécuter. Une fois exécuté, il peut effectuer des actions malveillantes sans que l'utilisateur ne le sache."
+  },
+  {
+    "question": "Quelle est la principale différence entre le câble en cuivre 'UTP' et 'STP' ?",
+    "answerOptions": [
+      "Le STP est plus lent que l'UTP.",
+      "Le STP a un blindage métallique pour réduire les interférences, contrairement à l'UTP.",
+      "L'UTP est plus cher que le STP.",
+      "L'UTP a des paires torsadées, le STP non."
+    ],
+    "correctAnswer": "Le STP a un blindage métallique pour réduire les interférences, contrairement à l'UTP.",
+    "rationale": "UTP (Unshielded Twisted Pair) signifie 'paire torsadée non blindée', tandis que STP (Shielded Twisted Pair) signifie 'paire torsadée blindée'. Le blindage métallique du STP offre une meilleure protection contre les interférences électromagnétiques."
+  },
+  {
+    "question": "Quel protocole est utilisé pour obtenir une adresse IP automatiquement sur un réseau ?",
+    "answerOptions": [
+      "DNS",
+      "DHCP",
+      "ARP",
+      "ICMP"
+    ],
+    "correctAnswer": "DHCP",
+    "rationale": "DHCP (Dynamic Host Configuration Protocol) est un protocole qui permet aux périphériques d'obtenir automatiquement une adresse IP et d'autres informations de configuration réseau à partir d'un serveur, simplifiant ainsi la gestion du réseau."
+  },
+  {
+    "question": "Dans le modèle TCP/IP, quelle couche est équivalente à la couche de transport du modèle OSI ?",
+    "answerOptions": [
+      "Couche d'accès au réseau",
+      "Couche Internet",
+      "Couche transport",
+      "Couche application"
+    ],
+    "correctAnswer": "Couche transport",
+    "rationale": "La couche transport du modèle TCP/IP est directement équivalente à la couche de transport du modèle OSI. Elle est responsable de la communication de bout en bout et de la fiabilité des données (via TCP) ou de l'absence de fiabilité (via UDP)."
+  },
+  {
+    "question": "Quel est le but d'un VPN (Virtual Private Network) ?",
+    "answerOptions": [
+      "Augmenter la vitesse de l'Internet.",
+      "Créer une connexion sécurisée et chiffrée sur un réseau public.",
+      "Bloquer les publicités en ligne.",
+      "Distribuer des adresses IP aux périphériques."
+    ],
+    "correctAnswer": "Créer une connexion sécurisée et chiffrée sur un réseau public.",
+    "rationale": "Un VPN (réseau privé virtuel) établit une connexion sécurisée et chiffrée (un 'tunnel') sur un réseau moins sécurisé, comme Internet. Cela permet aux utilisateurs d'envoyer et de recevoir des données de manière anonyme et confidentielle."
+  },
+  {
+    "question": "Qu'est-ce que l'adresse de passerelle par défaut (Default Gateway) dans une configuration IP ?",
+    "answerOptions": [
+      "L'adresse IP du serveur DNS.",
+      "L'adresse IP du routeur qui permet d'accéder à d'autres réseaux, y compris Internet.",
+      "L'adresse IP de la carte réseau.",
+      "L'adresse IP de l'imprimante réseau."
+    ],
+    "correctAnswer": "L'adresse IP du routeur qui permet d'accéder à d'autres réseaux, y compris Internet.",
+    "rationale": "La passerelle par défaut est le point de sortie du réseau local. C'est l'adresse IP du routeur auquel tous les périphériques du réseau envoient leurs paquets pour atteindre des destinations en dehors de leur propre réseau local, comme Internet."
+  },
+  {
+    "question": "Quel protocole est utilisé pour la messagerie électronique ?",
+    "answerOptions": [
+      "HTTP",
+      "FTP",
+      "SMTP",
+      "SSH"
+    ],
+    "correctAnswer": "SMTP",
+    "rationale": "SMTP (Simple Mail Transfer Protocol) est le protocole standard utilisé pour l'envoi de courrier électronique. C'est le protocole qui permet aux serveurs de messagerie de communiquer entre eux pour livrer les e-mails."
+  },
+  {
+    "question": "Quel est un risque de sécurité majeur associé à l'utilisation du protocole Telnet ?",
+    "answerOptions": [
+      "Il ne prend en charge que les connexions locales.",
+      "Il est trop lent.",
+      "Il transmet les données, y compris les mots de passe, en texte clair (non chiffré).",
+      "Il n'est pas compatible avec les routeurs Cisco."
+    ],
+    "correctAnswer": "Il transmet les données, y compris les mots de passe, en texte clair (non chiffré).",
+    "rationale": "Telnet est un protocole de connexion à distance très ancien qui n'utilise aucun chiffrement. Toutes les communications, y compris les identifiants et les mots de passe, sont transmises en clair, ce qui les rend vulnérables aux attaques d'interception."
+  },
+  {
+    "question": "Quel protocole est utilisé pour accéder à un serveur de manière sécurisée en ligne de commande ?",
+    "answerOptions": [
+      "Telnet",
+      "FTP",
+      "SSH",
+      "HTTP"
+    ],
+    "correctAnswer": "SSH",
+    "rationale": "SSH (Secure Shell) est un protocole réseau qui permet aux utilisateurs de se connecter de manière sécurisée à un ordinateur distant. Contrairement à Telnet, SSH chiffre toutes les communications, y compris les identifiants et les données, pour garantir la confidentialité et l'intégrité."
+  },
+  {
+    "question": "Qu'est-ce qu'une adresse IP privée ?",
+    "answerOptions": [
+      "Une adresse IP qui ne peut pas être utilisée sur Internet.",
+      "Une adresse IP attribuée par le FAI.",
+      "Une adresse IP qui ne change jamais.",
+      "Une adresse IP qui est toujours publique."
+    ],
+    "correctAnswer": "Une adresse IP qui ne peut pas être utilisée sur Internet.",
+    "rationale": "Les adresses IP privées sont des plages d'adresses spécifiques réservées à une utilisation dans les réseaux locaux (LAN). Elles ne sont pas routables sur Internet et ne peuvent être utilisées pour la communication qu'au sein de leur propre réseau local. C'est pour cela que la traduction d'adresse réseau (NAT) est souvent utilisée pour les adresses privées."
+  },
+  {
+    "question": "Qu'est-ce qu'un pare-feu de nouvelle génération (Next-Generation Firewall, NGFW) ?",
+    "answerOptions": [
+      "Un pare-feu qui peut bloquer tout le trafic.",
+      "Un pare-feu qui n'utilise pas d'adresses IP.",
+      "Un pare-feu de base qui ne filtre que les adresses IP.",
+      "Un pare-feu avancé qui intègre des fonctionnalités telles que la détection d'intrusion et le contrôle des applications."
+    ],
+    "correctAnswer": "Un pare-feu avancé qui intègre des fonctionnalités telles que la détection d'intrusion et le contrôle des applications.",
+    "rationale": "Les pare-feux de nouvelle génération vont au-delà du filtrage de base en intégrant des fonctionnalités plus sophistiquées comme la détection d'intrusion (IPS/IDS), la détection de menaces avancées et la possibilité de contrôler les applications utilisées, ce qui les rend plus efficaces contre les menaces modernes."
+  },
+  {
+    "question": "Quelle couche du modèle OSI est responsable de la segmentation des données en segments ?",
+    "answerOptions": [
+      "Couche physique",
+      "Couche liaison de données",
+      "Couche réseau",
+      "Couche transport"
+    ],
+    "correctAnswer": "Couche transport",
+    "rationale": "La couche transport (couche 4) est responsable de la segmentation des données en segments (pour TCP) ou datagrammes (pour UDP) et de leur re-assemblage à la destination."
+  },
+  {
+    "question": "Quel est le but d'un commutateur de couche d'accès dans une architecture de réseau hiérarchique ?",
+    "answerOptions": [
+      "Connecter les réseaux de différentes entreprises.",
+      "Fournir une connexion finale aux périphériques d'extrémité (ordinateurs, téléphones).",
+      "Acheminer le trafic entre les commutateurs d'agrégation.",
+      "Gérer le trafic à grande vitesse."
+    ],
+    "correctAnswer": "Fournir une connexion finale aux périphériques d'extrémité (ordinateurs, téléphones).",
+    "rationale": "Dans une architecture de réseau hiérarchique, les commutateurs de couche d'accès sont les périphériques qui se connectent directement aux périphériques d'extrémité (PC, téléphones IP, imprimantes) et fournissent un point d'accès au réseau."
+  },
+  {
+    "question": "Quel est le but principal de l'adresse de diffusion (Broadcast address) ?",
+    "answerOptions": [
+      "Envoyer un message à un seul périphérique spécifique.",
+      "Envoyer un message à un groupe de périphériques.",
+      "Envoyer un message à tous les périphériques d'un même réseau.",
+      "Envoyer un message à un périphérique en dehors du réseau local."
+    ],
+    "correctAnswer": "Envoyer un message à tous les périphériques d'un même réseau.",
+    "rationale": "Une adresse de diffusion (broadcast) est une adresse spéciale qui est utilisée pour envoyer un paquet à tous les hôtes d'un même réseau en une seule fois."
+  },
+  {
+    "question": "Quel protocole est utilisé pour traduire une adresse IP en adresse MAC ?",
+    "answerOptions": [
+      "DHCP",
+      "ARP",
+      "DNS",
+      "ICMP"
+    ],
+    "correctAnswer": "ARP",
+    "rationale": "ARP (Address Resolution Protocol) est un protocole qui permet de faire le lien entre une adresse IP de couche 3 et une adresse MAC de couche 2. Il est crucial pour la communication sur un réseau local."
+  },
+  {
+    "question": "Quel est l'un des inconvénients du protocole UDP (User Datagram Protocol) ?",
+    "answerOptions": [
+      "Il n'est pas fiable, il ne garantit pas la livraison des données.",
+      "Il est très lent.",
+      "Il est trop sécurisé.",
+      "Il utilise trop de bande passante."
+    ],
+    "correctAnswer": "Il n'est pas fiable, il ne garantit pas la livraison des données.",
+    "rationale": "UDP est un protocole sans connexion et non fiable, ce qui signifie qu'il n'offre aucune garantie que les paquets atteindront leur destination ou qu'ils arriveront dans le bon ordre. Il est cependant plus rapide et a moins de surcharge que TCP, ce qui le rend idéal pour des applications en temps réel comme la voix sur IP et le streaming vidéo."
+  },
+  {
+    "question": "Quelle est l'une des caractéristiques de l'approche de défense en profondeur (defense-in-depth) ?",
+    "answerOptions": [
+      "Se fier à un seul périphérique de sécurité très puissant.",
+      "Utiliser plusieurs couches de sécurité pour protéger les systèmes.",
+      "Filtrer tout le trafic, y compris le trafic légitime.",
+      "Ne pas utiliser de pare-feu."
+    ],
+    "correctAnswer": "Utiliser plusieurs couches de sécurité pour protéger les systèmes.",
+    "rationale": "La défense en profondeur est une stratégie de sécurité qui consiste à utiliser plusieurs couches de défense pour protéger les informations. Si une couche est contournée, une autre couche de protection est en place pour empêcher l'attaque de réussir."
+  },
+  {
+    "question": "Quel type de câble en cuivre est immunisé contre les interférences radio et électromagnétiques ?",
+    "answerOptions": [
+      "Câble coaxial",
+      "Câble à paires torsadées non blindées (UTP)",
+      "Câble à paires torsadées blindées (STP)",
+      "Tous les câbles en cuivre."
+    ],
+    "correctAnswer": "Câble à paires torsadées blindées (STP)",
+    "rationale": "Le câble STP (Shielded Twisted Pair) utilise une feuille de blindage métallique autour des paires de fils torsadées, ce qui le protège des interférences électromagnétiques (EMI) et des interférences radio (RFI), contrairement au câble UTP qui n'a pas de blindage."
+  },
+  {
+    "question": "Quelle est l'adresse IP de boucle locale (loopback) par défaut sur IPv4 ?",
+    "answerOptions": [
+      "0.0.0.0",
+      "192.168.1.1",
+      "127.0.0.1",
+      "255.255.255.255"
+    ],
+    "correctAnswer": "127.0.0.1",
+    "rationale": "L'adresse IP de boucle locale 127.0.0.1 est une adresse réservée qui pointe vers la machine locale elle-même. Elle est utilisée pour les tests et le diagnostic réseau, car les paquets envoyés à cette adresse ne quittent jamais la machine."
+  },
+  {
+    "question": "Qu'est-ce qu'une table de routage ?",
+    "answerOptions": [
+      "Une table qui liste toutes les adresses MAC sur un réseau.",
+      "Une table qui stocke les mots de passe des utilisateurs.",
+      "Une table que le routeur utilise pour déterminer le meilleur chemin pour un paquet de données.",
+      "Une liste de toutes les adresses IP disponibles sur le réseau."
+    ],
+    "correctAnswer": "Une table que le routeur utilise pour déterminer le meilleur chemin pour un paquet de données.",
+    "rationale": "Une table de routage est une base de données qui stocke les informations de routage des paquets de données. Les routeurs utilisent cette table pour déterminer le chemin le plus efficace pour un paquet de données jusqu'à sa destination finale."
+  },
+  {
+    "question": "Quel est l'un des rôles de l'adresse de sous-réseau (subnet mask) ?",
+    "answerOptions": [
+      "Identifier l'adresse MAC d'un périphérique.",
+      "Identifier la passerelle par défaut.",
+      "Séparer la partie réseau de la partie hôte d'une adresse IP.",
+      "Déterminer la vitesse de la connexion."
+    ],
+    "correctAnswer": "Séparer la partie réseau de la partie hôte d'une adresse IP.",
+    "rationale": "Le masque de sous-réseau est utilisé conjointement avec une adresse IP pour identifier la partie de l'adresse qui correspond à l'ID du réseau et celle qui correspond à l'ID de l'hôte. Cela permet aux périphériques de déterminer s'ils communiquent avec un hôte sur leur propre réseau ou sur un réseau distant."
+  },
+  {
+    "question": "Quel protocole est utilisé pour la traduction d'adresses réseau (NAT) ?",
+    "answerOptions": [
+      "ARP",
+      "DHCP",
+      "TCP",
+      "Aucun de ces protocoles, c'est une fonction d'un routeur."
+    ],
+    "correctAnswer": "Aucun de ces protocoles, c'est une fonction d'un routeur.",
+    "rationale": "La traduction d'adresses réseau (NAT) est une fonction intégrée dans les routeurs et les pare-feux. Il s'agit d'une technique de réécriture des adresses IP dans les en-têtes des paquets IP, et non d'un protocole distinct."
+  },
+  {
+    "question": "Qu'est-ce qu'un 'virus' informatique ?",
+    "answerOptions": [
+      "Un programme qui se propage de manière autonome sur un réseau.",
+      "Un programme malveillant qui nécessite un programme hôte pour se propager.",
+      "Un logiciel qui affiche des publicités indésirables.",
+      "Un programme qui collecte les informations personnelles."
+    ],
+    "correctAnswer": "Un programme malveillant qui nécessite un programme hôte pour se propager.",
+    "rationale": "Un virus informatique est un type de logiciel malveillant qui s'insère dans un autre programme (le 'hôte'). Il a besoin de l'exécution de son hôte pour se répliquer et se propager à d'autres fichiers ou systèmes."
+  },
+  {
+    "question": "Quelle couche du modèle TCP/IP est responsable de l'encapsulation des données de la couche application dans des segments TCP ou des datagrammes UDP ?",
+    "answerOptions": [
+      "Couche d'accès au réseau",
+      "Couche Internet",
+      "Couche transport",
+      "Couche application"
+    ],
+    "correctAnswer": "Couche transport",
+    "rationale": "La couche transport du modèle TCP/IP est la couche qui reçoit les données de la couche application et les prépare pour la transmission en les encapsulant dans des segments (pour TCP) ou des datagrammes (pour UDP), avant de les envoyer à la couche Internet."
+  },
+  {
+    "question": "Quel est l'un des inconvénients de la fibre optique ?",
+    "answerOptions": [
+      "Une bande passante limitée.",
+      "Elle est sensible aux interférences électromagnétiques.",
+      "Elle est plus coûteuse et plus difficile à installer que le cuivre.",
+      "Elle ne peut pas transmettre de signaux sur de longues distances."
+    ],
+    "correctAnswer": "Elle est plus coûteuse et plus difficile à installer que le cuivre.",
+    "rationale": "Bien que la fibre optique offre de nombreux avantages (grande bande passante, longue distance, immunité aux interférences), elle est généralement plus chère à produire et plus complexe à installer et à connecter que le câble en cuivre, ce qui constitue un inconvénient majeur."
+  },
+  {
+    "question": "Quel protocole est utilisé pour la gestion et la surveillance des périphériques réseau ?",
+    "answerOptions": [
+      "SNMP",
+      "FTP",
+      "DNS",
+      "ICMP"
+    ],
+    "correctAnswer": "SNMP",
+    "rationale": "SNMP (Simple Network Management Protocol) est un protocole standard utilisé pour échanger des informations entre des périphériques réseau et un système de gestion central. Il permet de surveiller, de configurer et de gérer les périphériques tels que les routeurs, les commutateurs et les serveurs."
+  },
+  {
+    "question": "Qu'est-ce que le 'chiffrement' en matière de sécurité réseau ?",
+    "answerOptions": [
+      "Le processus de conversion de données en un format lisible.",
+      "Le processus de masquage des adresses IP.",
+      "Le processus de conversion de données en un code pour en empêcher l'accès non autorisé.",
+      "Le processus de blocage du trafic indésirable."
+    ],
+    "correctAnswer": "Le processus de conversion de données en un code pour en empêcher l'accès non autorisé.",
+    "rationale": "Le chiffrement est le processus de transformation de données (texte clair) en un format illisible (texte chiffré) à l'aide d'une clé de chiffrement. Il est essentiel pour garantir la confidentialité des informations lors de leur transmission sur un réseau."
+  },
+  {
+    "question": "Quelle est la principale fonction d'un commutateur d'agrégation dans une architecture de réseau hiérarchique ?",
+    "answerOptions": [
+      "Connecter des périphériques d'extrémité au réseau.",
+      "Acheminer le trafic vers Internet.",
+      "Fournir un chemin de données entre les commutateurs d'accès et les commutateurs de cœur.",
+      "Gérer le routage à haute vitesse."
+    ],
+    "correctAnswer": "Fournir un chemin de données entre les commutateurs d'accès et les commutateurs de cœur.",
+    "rationale": "Dans une architecture hiérarchique, la couche d'agrégation (ou de distribution) sert de point de collecte pour le trafic provenant des commutateurs de la couche d'accès. Elle fournit un chemin de routage et de commutation vers la couche de cœur."
+  },
+  {
+    "question": "Quel est le protocole de communication de la couche 4 (Transport) qui est orienté connexion et fiable ?",
+    "answerOptions": [
+      "IP",
+      "UDP",
+      "ICMP",
+      "TCP"
+    ],
+    "correctAnswer": "TCP",
+    "rationale": "TCP (Transmission Control Protocol) est un protocole de la couche transport qui est orienté connexion et fiable. Il garantit la livraison des paquets, leur ordre et la détection des erreurs, ce qui le rend idéal pour des applications comme le transfert de fichiers et les pages web."
+  },
+  {
+    "question": "Quelle est la fonction principale d'un système de prévention d'intrusion (IPS) ?",
+    "answerOptions": [
+      "Simplement alerter les administrateurs des menaces.",
+      "Détecter et bloquer activement les menaces sur le réseau.",
+      "Analyser uniquement le trafic chiffré.",
+      "Gérer les adresses IP du réseau."
+    ],
+    "correctAnswer": "Détecter et bloquer activement les menaces sur le réseau.",
+    "rationale": "Contrairement à un IDS qui se contente d'alerter, un IPS (Intrusion Prevention System) est un système de sécurité qui surveille activement le trafic réseau et peut automatiquement prendre des mesures pour bloquer les menaces identifiées."
+  },
+  {
+    "question": "Quel est le principal avantage de l'IPv6 par rapport à l'IPv4 ?",
+    "answerOptions": [
+      "Un plus petit espace d'adressage.",
+      "Une configuration plus complexe.",
+      "Un espace d'adressage beaucoup plus grand.",
+      "Une plus grande compatibilité avec les anciens périphériques."
+    ],
+    "correctAnswer": "Un espace d'adressage beaucoup plus grand.",
+    "rationale": "L'avantage le plus significatif de l'IPv6 est son espace d'adressage étendu (128 bits), qui résout le problème d'épuisement des adresses de l'IPv4 (32 bits) et permet de connecter un nombre quasi illimité de périphériques à Internet."
+  },
+  {
+    "question": "Qu'est-ce qu'une politique de sécurité du réseau ?",
+    "answerOptions": [
+      "Un ensemble de règles pour les employés.",
+      "Un document qui définit les règles de sécurité, les procédures et les contrôles pour protéger les ressources du réseau.",
+      "Un logiciel de pare-feu.",
+      "Une liste d'adresses IP autorisées."
+    ],
+    "correctAnswer": "Un document qui définit les règles de sécurité, les procédures et les contrôles pour protéger les ressources du réseau.",
+    "rationale": "Une politique de sécurité est un document formel qui décrit les règles et les procédures qu'une organisation met en œuvre pour protéger ses ressources, notamment en matière d'accès, d'utilisation des données et de réponse aux incidents."
+  }
+];
+
+        // Éléments du DOM
+        const questionText = document.getElementById('question-text');
+        const answerButtons = document.getElementById('answer-buttons');
+        const nextBtn = document.getElementById('next-btn');
+        const feedbackSection = document.getElementById('feedback-section');
+        const feedbackText = document.getElementById('feedback-text');
+        const rationaleText = document.getElementById('rationale-text');
+        const scoreDisplay = document.getElementById('score-display');
+        const questionCountDisplay = document.getElementById('question-count-display');
+        const endQuizModal = document.getElementById('end-quiz-modal');
+        const finalScore = document.getElementById('final-score');
+        const restartBtn = document.getElementById('restart-btn');
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let isAnswerChecked = false;
+        let userSelectedAnswers = [];
+
+        // Fonction pour démarrer le quiz
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            isAnswerChecked = false;
+            endQuizModal.classList.add('hidden');
+            document.getElementById('quiz-container').classList.remove('hidden');
+            scoreDisplay.textContent = `Score: ${score}`;
+            nextBtn.textContent = 'Vérifier la réponse';
+            showQuestion();
+        }
+
+        // Fonction pour afficher la question actuelle
+        function showQuestion() {
+            const currentQuestion = questions[currentQuestionIndex];
+            const isMultipleChoice = Array.isArray(currentQuestion.correctAnswer);
+
+            questionText.textContent = currentQuestion.question;
+            questionCountDisplay.textContent = `Question ${currentQuestionIndex + 1}/${questions.length}`;
+            answerButtons.innerHTML = '';
+            feedbackSection.classList.add('hidden');
+            nextBtn.disabled = true; // Désactive le bouton "Suivant" tant qu'une réponse n'est pas sélectionnée
+            userSelectedAnswers = [];
+
+            // Créer les boutons de réponse (radio ou checkbox)
+            currentQuestion.answerOptions.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add(
+                    'bg-gray-700', 'hover:bg-gray-600', 'text-left', 'py-3', 'px-6',
+                    'rounded-xl', 'transition-colors', 'duration-200', 'w-full',
+                    'focus:ring-2', 'focus:ring-indigo-500', 'focus:ring-offset-2', 'focus:ring-offset-gray-800'
+                );
+
+                if (isMultipleChoice) {
+                    // Pour les questions à choix multiples, utiliser des checkboxes visuelles
+                    button.dataset.index = index;
+                    button.addEventListener('click', () => {
+                        button.classList.toggle('bg-indigo-600');
+                        button.classList.toggle('bg-gray-700');
+                        button.classList.toggle('hover:bg-gray-600');
+                        const isSelected = button.classList.contains('bg-indigo-600');
+                        if (isSelected) {
+                            userSelectedAnswers.push(option);
+                        } else {
+                            userSelectedAnswers = userSelectedAnswers.filter(ans => ans !== option);
+                        }
+                        nextBtn.disabled = userSelectedAnswers.length === 0;
+                    });
+                } else {
+                    // Pour les questions à choix unique
+                    button.dataset.index = index;
+                    button.addEventListener('click', () => {
+                        // Désélectionner les autres boutons
+                        Array.from(answerButtons.children).forEach(btn => {
+                            btn.classList.remove('bg-indigo-600');
+                        });
+                        // Sélectionner le bouton cliqué
+                        button.classList.add('bg-indigo-600');
+                        userSelectedAnswers = [option];
+                        nextBtn.disabled = false;
+                    });
+                }
+                answerButtons.appendChild(button);
+            });
+        }
+
+        // Fonction pour vérifier la réponse
+        function checkAnswer() {
+            if (isAnswerChecked) return;
+
+            isAnswerChecked = true;
+            const currentQuestion = questions[currentQuestionIndex];
+            const isMultipleChoice = Array.isArray(currentQuestion.correctAnswer);
+
+            let isCorrect = false;
+            let correctAnswers = Array.isArray(currentQuestion.correctAnswer) ? currentQuestion.correctAnswer : [currentQuestion.correctAnswer];
+
+            if (isMultipleChoice) {
+                // Vérification pour choix multiples
+                isCorrect = userSelectedAnswers.length === correctAnswers.length &&
+                            userSelectedAnswers.every(ans => correctAnswers.includes(ans));
+            } else {
+                // Vérification pour choix unique
+                isCorrect = userSelectedAnswers.length === 1 && userSelectedAnswers[0] === correctAnswers[0];
+            }
+
+            // Mettre à jour le score et l'affichage
+            if (isCorrect) {
+                score++;
+                feedbackText.textContent = 'Correct ! 🎉';
+                feedbackText.classList.remove('text-red-400');
+                feedbackText.classList.add('text-green-400');
+            } else {
+                feedbackText.textContent = 'Incorrect. 😕';
+                feedbackText.classList.remove('text-green-400');
+                feedbackText.classList.add('text-red-400');
+            }
+
+            scoreDisplay.textContent = `Score: ${score}`;
+            rationaleText.textContent = `Justification: ${currentQuestion.rationale}`;
+            feedbackSection.classList.remove('hidden');
+
+            // Mettre en surbrillance les réponses
+            Array.from(answerButtons.children).forEach(button => {
+                const buttonText = button.textContent;
+                const isSelectedByUser = userSelectedAnswers.includes(buttonText);
+                const isCorrectOption = correctAnswers.includes(buttonText);
+                button.disabled = true; // Désactive les boutons après la vérification
+
+                if (isCorrectOption) {
+                    button.classList.add('bg-green-600');
+                } else if (isSelectedByUser && !isCorrectOption) {
+                    button.classList.add('bg-red-600');
+                }
+                button.classList.remove('hover:bg-gray-600');
+            });
+            
+            // Changer le texte du bouton et activer la navigation
+            nextBtn.textContent = 'Question suivante';
+            nextBtn.disabled = false;
+        }
+
+        // Fonction pour passer à la question suivante
+        function nextQuestion() {
+            if (!isAnswerChecked) {
+                checkAnswer();
+                return;
+            }
+
+            currentQuestionIndex++;
+            isAnswerChecked = false;
+
+            if (currentQuestionIndex < questions.length) {
+                nextBtn.textContent = 'Vérifier la réponse';
+                showQuestion();
+            } else {
+                endQuiz();
+            }
+        }
+
+        // Fonction pour afficher l'écran de fin de quiz
+        function endQuiz() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            endQuizModal.classList.remove('hidden');
+            finalScore.textContent = `Votre score final est de: ${score}/${questions.length}`;
+        }
+
+        // Événements
+        nextBtn.addEventListener('click', nextQuestion);
+        restartBtn.addEventListener('click', startQuiz);
+
+        // Démarrer le quiz au chargement de la page
+        document.addEventListener('DOMContentLoaded', startQuiz);
+    </script>
+</body>
+</html>
+
