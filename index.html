@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Sécurité et Réseaux</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Conteneur principal du quiz -->
+    <div id="quiz-container" class="bg-gray-800 p-8 md:p-12 rounded-2xl shadow-2xl max-w-6xl w-full">
+        <!-- En-tête du quiz -->
+        <h1 class="text-3xl md:text-4xl font-bold text-center mb-6 text-indigo-400">
+        Quiz sur la sécurité et les réseaux partie 1
+        </h1>
+        <div class="flex justify-between items-center mb-6 text-lg font-medium">
+            <a class="btn bg-orange-600 hover:bg-indigo-700 text-white font-bold py-2 px-3 rounded-full shadow-lg transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed" href="quiz_cyber2.html">Aller à la partie 2</a>
+           
+            <div>
+                  <span id="score-display">Score: 0</span>
+                  <span id="question-count-display">Question 1/10</span>
+            </div>
+        </div>
+
+        <!-- Section de la question -->
+        <div id="question-section" class="mb-6">
+            <p id="question-text" class="text-xl md:text-2xl font-semibold mb-4">Texte de la question</p>
+            <div id="answer-buttons" class="grid gap-4">
+                <!-- Les boutons de réponse seront injectés ici par JavaScript -->
+            </div>
+        </div>
+
+        <!-- Section de feedback -->
+        <div id="feedback-section" class="hidden mt-6">
+            <p id="feedback-text" class="text-lg font-medium mb-2"></p>
+            <p id="rationale-text" class="text-md leading-relaxed"></p>
+        </div>
+
+        <!-- Bouton de navigation -->
+        <div class="mt-8 flex justify-end">
+            <button id="next-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed">Suivant</button>
+        </div>
+    </div>
+
+    <!-- Modale de fin de quiz -->
+    <div id="end-quiz-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden">
+        <div class="bg-gray-800 p-8 md:p-12 rounded-2xl shadow-2xl max-w-md w-full text-center">
+            <h2 class="text-3xl font-bold text-indigo-400 mb-4">Quiz Terminé !</h2>
+            <p id="final-score" class="text-2xl mb-4">Votre score final est de: 0/10</p>
+            <button id="restart-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-colors duration-300">Recommencer</button>
+        </div>
+    </div>
+
+    <script>
+        // Tableau de questions, réponses et justifications
+        const questions = [
+          {
+    "question": "Les utilisateurs signalent que l'accès réseau est lent. Après avoir questionné les employés, l'administrateur réseau a découvert que l'un d'eux a téléchargé un programme de numérisation tiers pour l'imprimante. Quel type de malware peut ralentir les performances du réseau ?",
+    "answerOptions": [
+      "Phishing",
+      "Ver",
+      "Virus",
+      "Courrier indésirable"
+    ],
+    "correctAnswer": "Ver",
+    "rationale": "Un ver (worm) est un type de logiciel malveillant qui se réplique de manière autonome et se propage sur le réseau. Cette réplication et cette propagation consomment de la bande passante et des ressources système, ce qui peut entraîner un ralentissement significatif des performances du réseau, comme l'ont signalé les utilisateurs."
+  },
+  {
+    "question": "Un utilisateur a créé un nouveau programme et souhaite le distribuer à tous les collaborateurs d'une entreprise. L'utilisateur souhaite s'assurer que lorsqu'il télécharge le programme, celui-ci n'est pas modifié pendant le transfert. Que peut faire l'utilisateur pour s'assurer que le programme n'est pas modifié pendant le téléchargement ?",
+    "answerOptions": [
+      "Distribuez le programme sur une clé USB.",
+      "Installer le programme sur des ordinateurs individuels.",
+      "Créer un hash du fichier du programme pouvant être utilisé pour vérifier l'intégrité du fichier après son téléchargement.",
+      "Chiffrer le programme et exiger un mot de passe après son téléchargement.",
+      "Arrêtez l'antivirus sur tous les ordinateurs."
+    ],
+    "correctAnswer": "Créer un hash du fichier du programme pouvant être utilisé pour vérifier l'intégrité du fichier après son téléchargement.",
+    "rationale": "L'intégrité du fichier, qui garantit que le fichier n'a pas été modifié, peut être vérifiée en utilisant une valeur de hachage (hash). En créant un hash du fichier d'origine et en le fournissant aux utilisateurs, ces derniers peuvent calculer le hash du fichier téléchargé et le comparer à l'original. Si les deux hashs correspondent, l'intégrité du fichier est garantie."
+  },
+  {
+    "question": "Laquelle des mesures ci-dessous vous semble la plus importante en matière de cybersécurité dans les entreprises ? (4 choix possibles)",
+    "answerOptions": [
+      "L'installation d'antivirus/d'anti-malwares sur tous les ordinateurs",
+      "La formation du personnel sur le sujet (y compris les employés non rattachés au service informatique)",
+      "L'utilisation de mots de passe simples",
+      "L'utilisation d'un système d'authentification à deux facteurs (par exemple, confirmer sa connexion au moyen de son téléphone)",
+      "L'installation de pare-feux"
+    ],
+    "correctAnswer": [
+      "L'installation d'antivirus/d'anti-malwares sur tous les ordinateurs",
+      "La formation du personnel sur le sujet (y compris les employés non rattachés au service informatique)",
+      "L'utilisation d'un système d'authentification à deux facteurs (par exemple, confirmer sa connexion au moyen de son téléphone)",
+      "L'installation de pare-feux"
+    ],
+    "rationale": "L'installation d'antivirus/anti-malwares et de pare-feux constitue une base technique de protection. La formation du personnel est essentielle pour prévenir les erreurs humaines, qui sont souvent à l'origine des violations de sécurité. L'utilisation de l'authentification à deux facteurs (2FA) est une pratique de sécurité moderne qui renforce la protection des comptes au-delà de la simple utilisation d'un mot de passe. L'utilisation de mots de passe simples est une très mauvaise pratique et est incorrecte."
+  },
+  {
+    "question": "Quels sont les deux moyens les plus efficaces de se défendre contre les logiciels malveillants ?",
+    "answerOptions": [
+      "Mettre en place un VPN",
+      "Installer et mettre à jour le logiciel antivirus",
+      "Implémenter le RAID",
+      "Mettre à jour le système d'exploitation et les autres logiciels d'application"
+    ],
+    "correctAnswer": [
+      "Installer et mettre à jour le logiciel antivirus",
+      "Mettre à jour le système d'exploitation et les autres logiciels d'application"
+    ],
+    "rationale": "L'installation et la mise à jour d'un logiciel antivirus/antimalware sont cruciales pour détecter et supprimer les menaces existantes. De même, la mise à jour régulière des systèmes d'exploitation et des applications permet de corriger les failles de sécurité que les logiciels malveillants pourraient exploiter. Le VPN protège la connexion, le RAID assure la redondance des données, mais ces solutions ne sont pas une défense directe contre les malwares."
+  },
+  {
+    "question": "Quels sont les 3 mesures de sécurité les plus avancées à mettre en place :",
+    "answerOptions": [
+      "Configuration du cryptage avec WPA2",
+      "Configuration de l'authentification",
+      "Configuration du cryptage avec WEP",
+      "Configuration du filtrage du trafic"
+    ],
+    "correctAnswer": [
+      "Configuration du cryptage avec WPA2",
+      "Configuration de l'authentification",
+      "Configuration du filtrage du trafic"
+    ],
+    "rationale": "Le cryptage WPA2 est une méthode de sécurisation des réseaux sans fil qui est beaucoup plus robuste que le WEP, qui est obsolète et non sécurisé. La configuration de l'authentification garantit que seuls les utilisateurs autorisés peuvent accéder au réseau. Le filtrage du trafic, via des pare-feux ou d'autres outils, permet de contrôler les flux de données et de bloquer les communications malveillantes. Ces trois mesures sont des pratiques de sécurité avancées et essentielles pour protéger un réseau."
+  },
+  {
+    "question": "Lequel des mots de passe suivants est le plus sûr ?",
+    "answerOptions": [
+      "iLoVeYou",
+      "Bi%DuIn!So57Lo",
+      "D00R8377",
+      "1a2z3e4r"
+    ],
+    "correctAnswer": "Bi%DuIn!So57Lo",
+    "rationale": "La sécurité d'un mot de passe dépend de sa complexité et de sa longueur. Un mot de passe fort doit contenir une combinaison de lettres majuscules et minuscules, de chiffres et de caractères spéciaux. Le mot de passe 'Bi%DuIn!So57Lo' est le plus sûr car il est long et contient tous ces éléments, ce qui le rend très difficile à deviner ou à craquer par des attaques par force brute."
+  },
+  {
+    "question": "Un utilisateur se plaint qu'une page Web externe prend plus de temps que la normale pour se charger. La page Web finit par se charger sur la machine utilisateur. Quel outil le technicien doit-il utiliser avec les privilèges d'administrateur pour localiser le problème dans le réseau ?",
+    "answerOptions": [
+      "nslookup",
+      "ping",
+      "tracert",
+      "ipconfig /displaydns"
+    ],
+    "correctAnswer": "tracert",
+    "rationale": "L'outil 'tracert' (ou 'traceroute' sous Linux) est conçu pour tracer le chemin qu'un paquet de données prend pour atteindre sa destination sur le réseau. En analysant les temps de réponse à chaque 'saut' (hop) entre les routeurs, un technicien peut identifier où se produit la latence et localiser le point de congestion ou de défaillance qui ralentit l'accès à la page web."
+  },
+  {
+    "question": "Quel critère peut être utilisé pour sélectionner le type de média réseau approprié pour un réseau ?",
+    "answerOptions": [
+      "Les utilisateurs Finaux",
+      "L'environnement dans lequel le support sélectionné doit être installé",
+      "L'administrateur réseau",
+      "L'administrateur système"
+    ],
+    "correctAnswer": "L'environnement dans lequel le support sélectionné doit être installé",
+    "rationale": "Le choix du support réseau (câble en cuivre, fibre optique, sans fil) est directement influencé par l'environnement d'installation. Par exemple, la distance entre les appareils, la présence d'interférences électromagnétiques, les contraintes budgétaires ou les besoins en bande passante sont des facteurs critiques qui déterminent quel type de média est le plus adapté pour un réseau donné."
+  },
+  {
+    "question": "Quel est l'objectif de la fonction de compatibilité du réseau de sécurité ?",
+    "answerOptions": [
+      "Surveiller les activités d'un utilisateur",
+      "Déterminer les ressources accessibles par un utilisateur",
+      "Demander aux utilisateurs de prouver leur identité",
+      "Fournir des questions d'authentification"
+    ],
+    "correctAnswer": "Demander aux utilisateurs de prouver leur identité",
+    "rationale": "L'objectif principal d'une fonction de compatibilité du réseau de sécurité (ou d'authentification) est de vérifier l'identité des utilisateurs. Avant d'accorder l'accès à des ressources ou à des données, le système demande aux utilisateurs de prouver qui ils sont, généralement en fournissant des informations d'identification comme un nom d'utilisateur et un mot de passe."
+  },
+  {
+    "question": "Quels sont les trois avantages de l'utilisation de liens symboliques par rapport aux liens physiques sous Linux ? (Choisis trois.)",
+    "answerOptions": [
+      "Les liens symboliques peuvent être exportés.",
+      "Ils peuvent être compressés.",
+      "Ils peuvent créer un lien vers un fichier dans un système de fichiers différent.",
+      "Ils peuvent créer un lien vers un répertoire.",
+      "Ils peuvent être cryptés.",
+      "Ils peuvent montrer l'emplacement du fichier d'origine."
+    ],
+    "correctAnswer": [
+      "Ils peuvent créer un lien vers un fichier dans un système de fichiers différent.",
+      "Ils peuvent créer un lien vers un répertoire.",
+      "Ils peuvent montrer l'emplacement du fichier d'origine."
+    ],
+    "rationale": "Contrairement aux liens physiques, les liens symboliques peuvent pointer vers des fichiers sur un système de fichiers différent, ce qui offre une grande flexibilité. Ils peuvent également pointer vers des répertoires, ce que les liens physiques ne peuvent pas faire. Enfin, ils stockent le chemin d'accès au fichier d'origine, ce qui permet de voir la destination du lien, et peuvent être affichés avec des outils comme 'ls -l'."
+  },
+  {
+    "question": "Quel type de pare-feu est pris en charge par la plupart des routeurs et est le plus facile à mettre en œuvre ?",
+    "answerOptions": [
+      "Pare-feu de nouvelle génération",
+      "Pare-feu dynamique",
+      "Pare-feu passerelle d'application",
+      "Pare-feu de filtrage de paquets"
+    ],
+    "correctAnswer": "Pare-feu de filtrage de paquets",
+    "rationale": "Le pare-feu de filtrage de paquets est le type de pare-feu le plus basique et le plus répandu, couramment intégré dans les routeurs domestiques et d'entreprise. Il fonctionne en inspectant les en-têtes des paquets IP (adresses source/destination, ports) et en les autorisant ou les bloquant selon des règles prédéfinies. Sa simplicité le rend facile à configurer et à mettre en œuvre."
+  },
+  {
+    "question": "Un administrateur réseau cherche à préserver la confidentialité de l'ID utilisateur, du mot de passe et du contenu des sessions lorsqu'il configure une connexion distante CLI gérée par un commutateur. Quel est le mode d'accès le plus approprié (sécurisé) ?",
+    "answerOptions": [
+      "SSH",
+      "AUX",
+      "Console",
+      "Telnet"
+    ],
+    "correctAnswer": "SSH",
+    "rationale": "Pour sécuriser les connexions distantes, il est impératif d'utiliser un protocole qui chiffre les données. SSH (Secure Shell) est un protocole qui assure l'authentification et le cryptage des communications. Contrairement à Telnet, qui transmet les données en clair (y compris les noms d'utilisateur et les mots de passe), SSH protège la confidentialité des informations de connexion et du contenu des sessions, ce qui en fait le choix le plus approprié et sécurisé."
+  },
+  {
+    "question": "Dans un réseau, les ordinateurs se distinguent par leur :",
+    "answerOptions": [
+      "Nom",
+      "Marque",
+      "Adresse IP",
+      "Aucune bonne réponse"
+    ],
+    "correctAnswer": "Adresse IP",
+    "rationale": "Dans un réseau, les ordinateurs (ou tout autre appareil) sont identifiés de manière unique par leur adresse IP. Cette adresse numérique permet aux appareils de communiquer entre eux en acheminant les paquets de données vers la bonne destination. Bien que les ordinateurs aient aussi un nom, l'adresse IP est l'identifiant fondamental au niveau du réseau."
+  },
+  {
+    "question": "Un pare-feu empêche le trafic indésirable de pénétrer dans les zones protégées du réseau. Un pare-feu est généralement installé entre deux réseaux ou plus, et contrôle le trafic entre eux tout en bloquant les accès non autorisés.",
+    "answerOptions": [
+      "Vrai",
+      "Faux",
+      "Peu probable",
+      "Aucune bonne réponse"
+    ],
+    "correctAnswer": "Vrai",
+    "rationale": "La fonction principale d'un pare-feu est de filtrer et de contrôler le trafic réseau entre des zones de confiance (comme un réseau interne) et des zones moins fiables (comme Internet). Il agit comme une barrière de sécurité en appliquant des règles pour autoriser ou refuser l'accès aux données, ce qui correspond exactement à la description de l'énoncé. C'est une affirmation correcte."
+  },
+          {
+            "question": "Quelle déclaration décrit une zone lors de la mise en œuvre de ZPF sur un routeur Cisco ?",
+            "answerOptions": ["Une seule zone peut être associée à une même interface.", "Une zone définit la frontière de sécurité d'un réseau.", "Une zone permet de définir des politiques de sécurité pour une interface unique sur le routeur.", "Une zone est utilisée pour implémenter le filtrage du trafic pour TCP ou UDP."],
+            "correctAnswer": "Une zone définit la frontière de sécurité d'un réseau.",
+            "rationale": "Dans un pare-feu basé sur les zones (ZPF), une zone est une entité logique qui regroupe plusieurs interfaces. Les politiques de sécurité sont ensuite appliquées pour contrôler le trafic entre ces zones, ce qui définit la frontière de sécurité pour les segments de réseau."
+          },
+          {
+            "question": "Quelle technologie est utilisée par Cisco Advanced Malware Protection (AMP) pour se défendre et se protéger contre les menaces connues et émergentes ?",
+            "answerOptions": ["filtrage de sites Web et liste noire", "renseignement sur les menaces", "contrôle d'admission au réseau", "profilage du réseau"],
+            "correctAnswer": "renseignement sur les menaces",
+            "rationale": "Cisco Advanced Malware Protection (AMP) utilise une base de données de renseignements sur les menaces de grande envergure (appelée Cisco Talos) pour identifier les fichiers malveillants et se défendre contre les menaces connues et émergentes."
+          },
+          {
+            "question": "Quelle méthode peut-on utiliser pour durcir un appareil ?",
+            "answerOptions": ["permettre la détection automatique USB", "utilisez SSH et désactivez l'accès au compte root via SSH", "permettre aux services par défaut de rester activés", "maintenir l'utilisation des mêmes mots de passe"],
+            "correctAnswer": "utilisez SSH et désactivez l'accès au compte root via SSH",
+            "rationale": "Le 'durcissement' d'un appareil consiste à réduire sa surface d'attaque. Désactiver l'accès direct au compte root via SSH est une mesure de sécurité cruciale car cela empêche un attaquant de tenter de se connecter directement avec les plus hauts privilèges."
+          },
+          {
+            "question": "Quelle méthode de filtrage utilise l'adresse physique pour spécifier exactement quel appareil est autorisé ou bloqué pour l'envoi de données sur un réseau ?",
+            "answerOptions": ["Redirection de port", "Déclenchement de port", "Filtrage d'adresse MAC", "Liste blanche"],
+            "correctAnswer": "Filtrage d'adresse MAC",
+            "rationale": "L'adresse physique d'un appareil sur un réseau est son adresse MAC. Le filtrage d'adresse MAC est une méthode qui utilise cette adresse unique pour contrôler l'accès au réseau, en autorisant ou en bloquant des appareils spécifiques."
+          },
+          {
+            "question": "Quelles sont les deux caractéristiques du trafic réseau surveillées si un technicien réseau configure le pare-feu de l'entreprise pour qu'il fonctionne comme un filtre de paquets ?",
+            "answerOptions": ["Adresses physiques", "Vitesse de paquet", "Protocoles", "Taille de paquet", "Ports"],
+            "correctAnswer": ["Protocoles", "Ports"],
+            "rationale": "Un pare-feu de type 'filtre de paquets' (ou pare-feu sans état) examine les en-têtes de chaque paquet individuel. Il prend des décisions d'autorisation ou de blocage en se basant sur des informations telles que les adresses IP, les numéros de port (ports) et les types de protocoles (Protocoles)."
+          },
+          {
+            "question": "Quel paramètre sans fil est utilisé par un point d'accès pour diffuser des trames incluant le SSID ?",
+            "answerOptions": ["mode passif", "réglage des canaux", "mode actif", "Mode sécurité"],
+            "correctAnswer": "mode actif",
+            "rationale": "En 'mode actif', un point d'accès sans fil diffuse des trames 'beacon' qui contiennent l'identifiant du réseau (SSID). C'est ce qui permet aux appareils de détecter le réseau et de s'y connecter. En 'mode passif', l'AP ne diffuse pas le SSID."
+          },
+          {
+            "question": "Lors des enquêtes de criminalistique informatique, quel type de données est perdu lors de la mise hors tension de l'ordinateur ?",
+            "answerOptions": ["Données stockées sur des disques", "SSD Données stockées sur disque magnétique", "Données stockées sur un disque externe", "Données stockées dans la RAM"],
+            "correctAnswer": "Données stockées dans la RAM",
+            "rationale": "La RAM (mémoire vive) est une mémoire volatile, ce qui signifie que son contenu est perdu dès que l'alimentation électrique est coupée. C'est un point critique en criminalistique numérique, car les données stockées temporairement dans la RAM sont souvent essentielles pour l'enquête."
+          },
+          {
+    "question": "Parmi les types de connexion suivants, trois sont sans fil. Lesquels ?",
+    "answerOptions": [
+      "Connexion satellitaire",
+      "Wi-Fi",
+      "Fibre optique",
+      "DSL",
+      "4G"
+    ],
+    "correctAnswer": [
+      "Connexion satellitaire",
+      "Wi-Fi",
+      "4G"
+    ],
+    "rationale": "Les connexions sans fil utilisent des ondes radio pour transmettre des données. La connexion satellitaire, le Wi-Fi et la 4G sont tous des exemples de technologies de communication sans fil. La fibre optique et le DSL (Digital Subscriber Line) sont des technologies de connexion filaire qui utilisent respectivement la lumière dans des câbles de verre et les lignes téléphoniques en cuivre."
+  },
+  {
+    "question": "Quels sont les deux types d'attaques utilisés sur les résolveurs ouverts DNS ? (Choisissez deux.)",
+    "answerOptions": [
+      "Intoxication à l'ARP",
+      "utilisation des ressources",
+      "amorti",
+      "amplification et réflexion",
+      "flux rapide"
+    ],
+    "correctAnswer": [
+      "utilisation des ressources",
+      "amplification et réflexion"
+    ],
+    "rationale": "Les résolveurs DNS ouverts sont vulnérables à deux types d'attaques principales : l'utilisation des ressources et l'amplification et réflexion. L'utilisation des ressources se produit lorsqu'un attaquant inonde le résolveur de requêtes, ce qui épuise ses ressources et le rend indisponible. L'amplification et la réflexion sont des attaques qui exploitent la nature des requêtes DNS pour envoyer de petites requêtes à un résolveur qui génère une réponse beaucoup plus grande, puis la renvoie à une victime ciblée, amplifiant ainsi l'attaque."
+  },
+  {
+    "question": "Quelle caractéristique décrit un logiciel antivirus ?",
+    "answerOptions": [
+      "Applications qui protègent les terminaux contre l'infection par des logiciels malveillants",
+      "Un appareil réseau qui filtre l'accès et le trafic entrant dans un réseau",
+      "Un protocole de tunneling qui fournit aux utilisateurs distants un accès sécurisé au réseau d'une organisation",
+      "Logiciel sur un routeur qui filtre le trafic en fonction des adresses IP ou des applications"
+    ],
+    "correctAnswer": "Applications qui protègent les terminaux contre l'infection par des logiciels malveillants",
+    "rationale": "Le logiciel antivirus est spécifiquement conçu pour protéger les terminaux (ordinateurs, serveurs, etc.) en scannant, détectant, et supprimant les logiciels malveillants tels que les virus, les vers, les chevaux de Troie et les rançongiciels. Les autres options décrivent respectivement un pare-feu, un VPN, et les listes de contrôle d'accès sur les routeurs."
+  },
+  {
+    "question": "L'adresse IPv6 a combien de bits ?",
+    "answerOptions": [
+      "4",
+      "128",
+      "64",
+      "32"
+    ],
+    "correctAnswer": "128",
+    "rationale": "L'adresse IPv6 est un identifiant unique pour les interfaces réseau qui est utilisé pour le routage des paquets sur Internet. Contrairement à l'IPv4 qui utilise 32 bits, l'IPv6 est codée sur 128 bits, ce qui offre un espace d'adressage beaucoup plus vaste."
+  },
+  {
+    "question": "Quel périphérique réseau prend les décisions de transfert en fonction de l'adresse MAC de destination contenue dans la trame ?",
+    "answerOptions": [
+      "Répétiteur",
+      "Routeur",
+      "Commutateur",
+      "Hub"
+    ],
+    "correctAnswer": "Commutateur",
+    "rationale": "Un **commutateur** (switch) opère au niveau de la couche 2 du modèle OSI. Il examine l'**adresse MAC** de destination d'une trame et utilise sa table d'adresses MAC pour déterminer sur quel port envoyer la trame. Cela permet une communication plus efficace et plus rapide qu'un hub, qui se contente de diffuser la trame à tous les ports."
+  },
+  {
+    "question": "Un technicien informatique souhaite créer une règle sur deux ordinateurs Windows 10 pour empêcher une application installée d'accéder à Internet public. Quel outil le technicien utiliserait-il pour accomplir cette tâche ?",
+    "answerOptions": [
+      "Gestion d'ordinateur",
+      "DMZ",
+      "Pare-feu Windows Defender avec sécurité avancée",
+      "Stratégie de sécurité locale"
+    ],
+    "correctAnswer": "Pare-feu Windows Defender avec sécurité avancée",
+    "rationale": "Le **Pare-feu Windows Defender avec sécurité avancée** est l'outil natif de Windows 10 (et des versions plus récentes) pour la configuration de règles de pare-feu détaillées. Il permet de bloquer ou d'autoriser le trafic pour des applications spécifiques, des ports, ou des adresses IP, ce qui est parfait pour empêcher une application d'accéder à Internet."
+  },
+  {
+    "question": "Quel numéro de port connu est utilisé par le protocole HTTP ?",
+    "answerOptions": [
+      "443",
+      "20",
+      "80",
+      "53"
+    ],
+    "correctAnswer": "80",
+    "rationale": "Le protocole **HTTP** (Hypertext Transfer Protocol), qui est la base de la communication sur le Web, utilise le **port 80** par défaut. Le port 443 est utilisé par sa version sécurisée, HTTPS. Le port 53 est pour le DNS et le port 20 pour le protocole FTP de transfert de données."
+  },
+  {
+    "question": "Quel service est fourni par HTTPS ?",
+    "answerOptions": [
+      "Utilise le cryptage pour sécuriser l'échange de texte, d'images graphiques, de sons et de vidéos sur le Web.",
+      "Traduit des noms de domaines (par exemple, force-n.sn) en adresses IP",
+      "Permet l'accès à distance aux périphériques et serveurs réseau.",
+      "Utilise le chiffrement pour fournir un accès distant sécurisé aux périphériques et serveurs réseau."
+    ],
+    "correctAnswer": "Utilise le cryptage pour sécuriser l'échange de texte, d'images graphiques, de sons et de vidéos sur le Web.",
+    "rationale": "HTTPS (Hypertext Transfer Protocol Secure) est la version sécurisée de HTTP. Son rôle principal est d'utiliser le **cryptage** (via le protocole SSL/TLS) pour sécuriser l'échange de données entre un navigateur web et un site. Cela garantit la confidentialité, l'intégrité et l'authenticité des informations échangées sur le Web, comme les mots de passe et les données de carte de crédit."
+  },
+  {
+    "question": "La conception d'une ZPF s'effectue en plusieurs étapes. Quelle étape implique de définir les limites du trafic soumis à des restrictions de politique lorsqu'il passe dans une autre région du réseau ?",
+    "answerOptions": [
+      "Établir des politiques entre les zones",
+      "Déterminer les zones",
+      "Concevoir l'infrastructure physique",
+      "Identifier les sous-ensembles dans les zones et fusionner les besoins en matière de trafic"
+    ],
+    "correctAnswer": "Établir des politiques entre les zones",
+    "rationale": "La 'Zone-Based Policy Firewall' (ZPF) est une approche de sécurité qui repose sur des zones de sécurité. L'étape cruciale de la conception consiste à **établir des politiques entre les zones**. C'est à ce moment-là que l'administrateur définit les règles précises qui contrôlent le flux de trafic entre différentes zones de sécurité (par exemple, de la zone interne vers la zone externe), en décidant ce qui est autorisé et ce qui est bloqué."
+  },
+  {
+    "question": "Quelle est une caractéristique d'un WAN ?",
+    "answerOptions": [
+      "Il s'étend sur un campus ou une ville pour permettre le partage des ressources régionales",
+      "Il est généralement détenu et géré par une seule maison ou entreprise",
+      "Il connecte plusieurs réseaux séparés géographiquement",
+      "Il nécessite un point d'accès sans fil pour connecter les utilisateurs au réseau"
+    ],
+    "correctAnswer": "Il connecte plusieurs réseaux séparés géographiquement",
+    "rationale": "Un **WAN** (Wide Area Network) est un réseau qui s'étend sur une vaste zone géographique, connectant plusieurs réseaux locaux (LAN). Contrairement à un LAN qui est généralement détenu et géré par une seule entité sur une zone restreinte, un WAN est souvent géré par des fournisseurs de services et relie des sites à travers des villes, des pays, voire des continents."
+  },
+  {
+    "question": "Comment la commande « service password-encryption » améliore-t-elle la sécurité des mots de passe sur des routeurs et des commutateurs Cisco ?",
+    "answerOptions": [
+      "Elle demande à l'utilisateur d'entrer des mots de passe chiffrés pour obtenir un accès à la console sur un routeur ou un commutateur.",
+      "Elle nécessite que des mots de passe soient utilisés lors d'une connexion distante à un routeur ou à un commutateur avec Telnet.",
+      "Elle chiffre les mots de passe qui sont stockés dans des fichiers de configuration de routeur et de commutateur.",
+      "Elle chiffre les mots de passe lorsqu'ils sont transmis sur le réseau."
+    ],
+    "correctAnswer": "Elle chiffre les mots de passe qui sont stockés dans des fichiers de configuration de routeur et de commutateur.",
+    "rationale": "La commande 'service password-encryption' sur les équipements Cisco a pour objectif de chiffrer (en utilisant un chiffrement faible de type 7) les mots de passe qui sont stockés en clair dans le fichier de configuration. Cela empêche quiconque ayant un accès physique ou un simple accès en lecture à la configuration de voir les mots de passe en texte brut. C'est une mesure de sécurité de base pour protéger les mots de passe de la configuration stockés localement."
+  },
+  {
+    "question": "Un flot de paquets avec des adresses IP sources invalides demande une connexion sur le réseau. Le serveur essaie activement de répondre, ce qui entraîne l'ignorance des demandes valides. Quel type d'attaque a eu lieu ?",
+    "answerOptions": [
+      "Détournement de session TCP",
+      "Réinitialisation TCP",
+      "Inondation TCP SYN",
+      "Inondation UDP"
+    ],
+    "correctAnswer": "Inondation TCP SYN",
+    "rationale": "L'attaque par **inondation TCP SYN** (SYN Flood) est une forme d'attaque par déni de service (DoS). L'attaquant envoie un grand nombre de paquets de demande de connexion (SYN) à un serveur, mais avec des adresses IP sources falsifiées ou invalides. Le serveur tente de répondre à chaque demande (en envoyant un paquet SYN-ACK) et attend une réponse qui ne viendra jamais. Les ressources du serveur sont alors épuisées, l'empêchant de traiter les requêtes légitimes, ce qui correspond exactement au scénario décrit."
+  },
+  {
+    "question": "Quel type de malware peut ralentir les performances du réseau ?",
+    "answerOptions": [
+      "Phishing",
+      "Ver",
+      "Virus",
+      "Courrier indésirable"
+    ],
+    "correctAnswer": "Ver",
+    "rationale": "Un **ver** est un type de logiciel malveillant (malware) qui a la capacité de se propager et de se répliquer de manière autonome sur un réseau. En se reproduisant et en se propageant activement, un ver consomme une bande passante réseau significative, ce qui peut entraîner une saturation du réseau et, par conséquent, un ralentissement général des performances pour tous les utilisateurs."
+  },
+  {
+    "question": "Parmi ces périphériques, lesquels sont des périphériques intermédiaires ?",
+    "answerOptions": [
+      "Ordinateur Portable",
+      "Routeur",
+      "Tablette",
+      "Commutateur"
+    ],
+    "correctAnswer": [
+      "Routeur",
+      "Commutateur"
+    ],
+    "rationale": "Les périphériques intermédiaires sont des équipements réseau qui assurent la communication entre les hôtes d'un réseau. Ils facilitent le flux de données. Le **routeur** et le **commutateur** sont des exemples classiques de périphériques intermédiaires. Les ordinateurs portables et les tablettes sont des périphériques finaux, c'est-à-dire les sources ou les destinations des messages sur le réseau."
+  },
+  {
+    "question": "Un spécialiste de la sécurité est invité à donner son avis sur une mesure de sécurité visant à empêcher des hôtes non autorisés d'accéder au réseau domestique des employés. Quelle mesure serait la plus efficace ?",
+    "answerOptions": [
+      "Implémentez un VLAN.",
+      "Mettre en place des systèmes de détection d'intrusion.",
+      "Implémentez le RAID.",
+      "Implémentez un pare-feu."
+    ],
+    "correctAnswer": "Implémentez un pare-feu.",
+    "rationale": "Un pare-feu est le dispositif le plus efficace pour contrôler le trafic et empêcher les hôtes non autorisés d'accéder à un réseau. Il agit comme une barrière entre le réseau local et l'extérieur, en filtrant le trafic entrant et sortant en fonction de règles de sécurité prédéfinies. Un VLAN est utilisé pour segmenter un réseau, le RAID sert à la redondance des données, et un système de détection d'intrusion ne fait que signaler les menaces, il ne les bloque pas activement."
+  },
+  {
+    "question": "Quel numéro de port connu est utilisé par le protocole HTTPS ?",
+    "answerOptions": [
+      "443",
+      "20",
+      "80",
+      "53"
+    ],
+    "correctAnswer": "443",
+    "rationale": "Le protocole **HTTPS** (Hypertext Transfer Protocol Secure) utilise le **port 443** par défaut pour établir des connexions sécurisées et cryptées entre un client (un navigateur web) et un serveur. Le port 80 est utilisé par le protocole HTTP non sécurisé, le port 53 par le DNS et le port 20 est associé au protocole FTP pour le transfert de données."
+  },
+  {
+    "question": "Que désigne le terme vulnérabilité ?",
+    "answerOptions": [
+      "Un ordinateur qui contient des données sensibles",
+      "Une méthode d'attaque pour exploiter une cible",
+      "Une faiblesse qui rend une cible susceptible aux attaques",
+      "Une menace potentielle créée par un hacker"
+    ],
+    "correctAnswer": "Une faiblesse qui rend une cible susceptible aux attaques",
+    "rationale": "En cybersécurité, une **vulnérabilité** est une faiblesse dans un système, un logiciel ou un processus de sécurité. Cette faiblesse peut être exploitée par une menace (comme un logiciel malveillant ou un pirate) pour compromettre la sécurité d'un système. C'est la porte d'entrée qu'un attaquant peut utiliser pour accéder à un système."
+  },
+  {
+    "question": "Quel champ de l'en-tête IPv6 pointe vers des informations facultatives de couche réseau transportées dans le paquet IPv6 ?",
+    "answerOptions": [
+      "classe de trafic",
+      "version",
+      "étiquette de flux",
+      "prochain en-tête"
+    ],
+    "correctAnswer": "prochain en-tête",
+    "rationale": "Le champ '**prochain en-tête**' (Next Header) de l'en-tête IPv6 joue un rôle clé dans la flexibilité du protocole. Il indique le type d'en-tête qui suit immédiatement l'en-tête IPv6 de base. Ce peut être un en-tête de transport (comme TCP ou UDP) ou l'un des en-têtes d'extension facultatifs d'IPv6, qui transportent des informations de couche réseau supplémentaires."
+  },
+  {
+    "question": "Quel est le résultat lorsqu'un administrateur Linux entre la commande man man ?",
+    "answerOptions": [
+      "La commande man man fournit de la documentation sur la commande man",
+      "La commande man man fournit une liste de commandes disponibles à l'invite actuelle",
+      "La commande man man ouvre le fichier journal le plus récent",
+      "La commande man man configure l'interface réseau avec une adresse manuelle"
+    ],
+    "correctAnswer": "La commande man man fournit de la documentation sur la commande man",
+    "rationale": "Dans un environnement Linux, la commande `man` (abréviation de 'manual') est utilisée pour afficher les pages de manuel des autres commandes. En tapant `man man`, l'utilisateur demande d'afficher la page de manuel de la commande `man` elle-même, ce qui fournit des informations sur son fonctionnement, ses options et son utilisation."
+  },
+  {
+    "question": "Quelle est la principale fonction d'un routeur ?",
+    "answerOptions": [
+      "Relier deux PC via la ligne téléphonique",
+      "Transférer les paquets et détecter le meilleur chemin entre les réseaux",
+      "Filtrer les flux de données et contrôler les communications qui traversent le réseau",
+      "Envoyer et traiter les données entre les ordinateurs via une ligne téléphonique"
+    ],
+    "correctAnswer": "Transférer les paquets et détecter le meilleur chemin entre les réseaux",
+    "rationale": "Un **routeur** opère au niveau de la couche 3 (réseau) du modèle OSI. Sa fonction principale est de diriger le trafic de données (paquets) entre différents réseaux. Pour ce faire, il utilise des tables de routage pour déterminer le **meilleur chemin** à emprunter pour que les paquets atteignent leur destination, même si celle-ci se trouve sur un autre réseau distant (comme Internet)."
+  },
+  {
+    "question": "Sélectionnez l'affirmation qui vous semble la plus exacte.",
+    "answerOptions": [
+      "Certains membres spécifiques du personnel (par exemple, les professionnels IT) devraient recevoir une formation pour apprendre à identifier les signes d'une cyberattaque",
+      "Tous les membres du personnel devraient recevoir une formation pour apprendre à identifier les signes d'une cyberattaque",
+      "Si une entreprise dispose d'un bon logiciel antivirus, le personnel ne devrait pas avoir besoin d'être formé à reconnaître les signes d'une cyberattaque",
+      "Seuls les membres des ressources humaines (RH) pour la gestion des contrats et autres"
+    ],
+    "correctAnswer": "Tous les membres du personnel devraient recevoir une formation pour apprendre à identifier les signes d'une cyberattaque",
+    "rationale": "La cybersécurité est la responsabilité de tous au sein d'une organisation. Les employés non-IT sont souvent la cible d'attaques de 'social engineering' comme le phishing. C'est pourquoi il est crucial que **tous les membres du personnel** reçoivent une formation pour reconnaître les signes d'une cyberattaque. Cette sensibilisation de masse constitue l'une des défenses les plus efficaces d'une entreprise."
+  },
+  {
+    "question": "Quel service convertit une adresse web spécifique en adresse IP du serveur web de destination ?",
+    "answerOptions": [
+      "Le protocole ICMP",
+      "Le protocole NTP",
+      "DNS",
+      "Le protocole DHCP"
+    ],
+    "correctAnswer": "DNS",
+    "rationale": "Le **DNS** (Domain Name System) est un service essentiel du réseau. Il agit comme un annuaire téléphonique pour Internet, traduisant les noms de domaine lisibles par l'homme (par exemple, 'www.google.com') en adresses IP numériques que les ordinateurs utilisent pour se connecter les uns aux autres. Sans le DNS, vous devriez mémoriser l'adresse IP de chaque site web que vous voulez visiter."
+  },
+  {
+    "question": "Un utilisateur doit accéder à Internet depuis son domicile. Quel appareil est nécessaire si un utilisateur se connecte à un FAI via le réseau téléphonique ?",
+    "answerOptions": [
+      "Commutateur",
+      "Modem ou Box",
+      "Serveur",
+      "Point d'accès sans fil"
+    ],
+    "correctAnswer": "Modem ou Box",
+    "rationale": "Pour se connecter à Internet via une ligne téléphonique (comme l'ADSL ou le VDSL), un utilisateur a besoin d'un **modem** (Modulateur-Démodulateur). Cet appareil convertit les signaux numériques de l'ordinateur en signaux analogiques qui peuvent être transmis sur la ligne téléphonique, et vice-versa. Les 'box' des FAI sont des modems multifonctions qui incluent souvent des fonctionnalités de routeur et de point d'accès Wi-Fi."
+  },
+  {
+    "question": "Quel utilisateur peut ignorer les autorisations de fichiers sur un ordinateur Linux ?",
+    "answerOptions": [
+      "utilisateur root",
+      "tout utilisateur disposant d'une autorisation de « groupe » sur le fichier",
+      "seul le créateur du fichier",
+      "tout utilisateur disposant d'une autorisation « autre » sur le fichier"
+    ],
+    "correctAnswer": "utilisateur root",
+    "rationale": "L'**utilisateur root** est l'administrateur système sur un système d'exploitation Linux. Cet utilisateur possède des privilèges illimités et peut lire, écrire, et exécuter n'importe quel fichier, quel que soit le propriétaire ou les permissions qui lui sont assignées. Les autres utilisateurs sont liés par le modèle de permission standard d'utilisateur, de groupe et d'autres."
+  },
+  {
+    "question": "Lequel des mots de passe suivants est le plus sûr ?",
+    "answerOptions": [
+      "123456",
+      "Dragon",
+      "Bi%DuIn!So57Lo",
+      "iLoVeYou"
+    ],
+    "correctAnswer": "Bi%DuIn!So57Lo",
+    "rationale": "Le mot de passe le plus sûr est généralement celui qui est le plus long et le plus complexe. **Bi%DuIn!So57Lo** est le plus sûr car il est long, contient un mélange de lettres majuscules et minuscules, de chiffres et de caractères spéciaux. Les autres mots de passe sont soit trop courts, soit trop simples, et pourraient être facilement craqués par des attaques par dictionnaire ou par force brute."
+  },
+   {
+    "question": "Quel type de connexion à Internet offre les taux de transfert les plus rapides ?",
+    "answerOptions": [
+      "Données mobiles",
+      "Satellite",
+      "Câble",
+      "Fibre"
+    ],
+    "correctAnswer": "Fibre",
+    "rationale": "La **fibre optique** est la technologie qui offre les vitesses de connexion Internet les plus rapides. Elle utilise des impulsions lumineuses pour transmettre les données, ce qui permet des débits considérablement plus élevés que les connexions par câble (qui utilisent le cuivre) ou les technologies sans fil comme le satellite et les données mobiles."
+  },
+  {
+    "question": "Quelle serait la cible d'une attaque par injection SQL ?",
+    "answerOptions": [
+      "base de données",
+      "e-mail",
+      "DHCP",
+      "DNS"
+    ],
+    "correctAnswer": "base de données",
+    "rationale": "Une **attaque par injection SQL** (Structured Query Language) cible spécifiquement les **bases de données**. L'attaquant insère du code SQL malveillant dans les champs de saisie d'une application web pour manipuler les requêtes SQL de la base de données. Cela peut lui permettre d'accéder, de modifier ou de supprimer des données sensibles."
+  },
+  {
+    "question": "Comment appelle-t-on des hackers qui agissent pour une cause ?",
+    "answerOptions": [
+      "Hacker",
+      "Hacktiviste ou Grey hat",
+      "Chapeau blanc",
+      "Chapeau bleu"
+    ],
+    "correctAnswer": "Hacktiviste ou Grey hat",
+    "rationale": "Les hackers qui agissent pour des motivations politiques ou sociales sont appelés des **hacktivistes**. Ils utilisent des techniques de piratage pour promouvoir une cause ou un message. Le terme 'grey hat' est également pertinent, car il désigne les hackers qui peuvent enfreindre la loi (comme un black hat), mais sans intention malveillante personnelle et parfois pour le bien public."
+  },
+  {
+    "question": "Quelles sont les trois commandes qui permettent de configurer un accès sécurisé à un routeur via une connexion à l'interface de console ? (Choisissez trois propositions.)",
+    "answerOptions": [
+      "password cisco",
+      "enable secret cisco",
+      "login",
+      "line vty 0 4",
+      "line console 0"
+    ],
+    "correctAnswer": [
+      "password cisco",
+      "login",
+      "line console 0"
+    ],
+    "rationale": "Pour sécuriser l'accès à un routeur via la ligne de console, vous devez spécifier la ligne de console, définir un mot de passe et l'activer. Les trois commandes correctes sont : \n1. **line console 0** : Cette commande entre dans le mode de configuration de la ligne de console.\n2. **password cisco** : Cette commande définit le mot de passe pour la ligne de console (dans cet exemple, 'cisco').\n3. **login** : Cette commande active la demande de mot de passe pour la ligne de console."
+  },
+  {
+    "question": "Quel terme est utilisé pour décrire la dissimulation de données dans un autre fichier tel qu'un graphique, un fichier audio ou tout autre fichier texte ?",
+    "answerOptions": [
+      "Masquage",
+      "Obscurcissement",
+      "stéganographie",
+      "Dissimulation"
+    ],
+    "correctAnswer": "stéganographie",
+    "rationale": "La **stéganographie** est la technique qui consiste à cacher des données (texte, images, etc.) à l'intérieur d'autres fichiers qui ne sont pas censés contenir de l'information secrète, comme des images, des fichiers audio ou vidéo. L'objectif est de dissimuler la présence même des données secrètes."
+  },
+  {
+    "question": "Quelle est la principale différence entre un hyperviseur de type 1 et un hyperviseur de type 2 ?",
+    "answerOptions": [
+      "Un hyperviseur de type 1 prend en charge la virtualisation des serveurs et un hyperviseur de type 2 uniquement la virtualisation des postes de travail.",
+      "Un hyperviseur de type 1 s'exécute directement sur le matériel du système et un hyperviseur de type 2 nécessite un système d'exploitation hôte pour s'exécuter.",
+      "Un hyperviseur de type 1 s'exécute sur des systèmes spécialisés et un hyperviseur de type 2 sur des ordinateurs de bureau.",
+      "Un hyperviseur de type 1 prend en charge toutes les virtualisations de systèmes d'exploitation de serveur et un hyperviseur de type 2 prend en charge la virtualisation Linux et Mac."
+    ],
+    "correctAnswer": "Un hyperviseur de type 1 s'exécute directement sur le matériel du système et un hyperviseur de type 2 nécessite un système d'exploitation hôte pour s'exécuter.",
+    "rationale": "La distinction fondamentale entre les deux types d'hyperviseurs réside dans leur emplacement. Un **hyperviseur de type 1** (aussi appelé 'bare-metal') s'exécute directement sur le matériel physique de l'ordinateur, sans système d'exploitation hôte, ce qui le rend plus efficace et plus rapide. Un **hyperviseur de type 2** (aussi appelé 'hosted') est une application qui s'exécute sur un système d'exploitation existant."
+  },
+  {
+    "question": "Un serveur reçoit un paquet client. Le numéro de port de destination du paquet est 22. Quelle application de service le client demande-t-il ?",
+    "answerOptions": [
+      "TFTP",
+      "SSH",
+      "DHCP",
+      "DNS"
+    ],
+    "correctAnswer": "SSH",
+    "rationale": "Les ports TCP et UDP sont utilisés pour identifier les services réseau. Le port **22** est le port standard et bien connu du protocole **SSH** (Secure Shell), qui est utilisé pour l'administration à distance et le transfert de fichiers de manière sécurisée."
+  },
+  {
+    "question": "Quelle commande peut être utilisée sur un PC Windows pour afficher la configuration IP de cet ordinateur ?",
+    "answerOptions": [
+      "ipconfig",
+      "ping",
+      "show ip interface brief",
+      "show interfaces"
+    ],
+    "correctAnswer": "ipconfig",
+    "rationale": "La commande **ipconfig** est l'outil de ligne de commande standard sur les systèmes d'exploitation Windows pour afficher la configuration réseau, y compris l'adresse IP, le masque de sous-réseau et la passerelle par défaut. 'ping' sert à tester la connectivité, et les commandes 'show...' sont des commandes Cisco IOS pour les équipements réseau, et non pour un PC Windows."
+  },
+  {
+    "question": "Un utilisateur reçoit un appel téléphonique d'une personne qui prétend représenter des services informatiques et demande ensuite à cet utilisateur de confirmer son nom d'utilisateur et son mot de passe à des fins d'audit. Quelle menace pour la sécurité cet appel téléphonique représente-t-il ?",
+    "answerOptions": [
+      "Spam",
+      "Anonymous keylogging (Enregistrement de frappe anonyme)",
+      "Ingénierie sociale ou Phishing",
+      "DDoS"
+    ],
+    "correctAnswer": "Ingénierie sociale ou Phishing",
+    "rationale": "Ce scénario décrit un cas classique d'**ingénierie sociale** (ou 'social engineering'). L'ingénierie sociale est l'art de manipuler des personnes pour qu'elles divulguent des informations confidentielles. Dans ce cas, l'attaquant se fait passer pour un membre de l'équipe informatique pour obtenir le nom d'utilisateur et le mot de passe, ce qui est une forme d'hameçonnage (phishing), mais spécifiquement par téléphone (vishing)."
+  },
+  {
+    "question": "Un employé mécontent utilise des outils de réseau sans fil gratuits pour déterminer des informations sur les réseaux sans fil de l'entreprise. Cette personne entend utiliser ces informations pour pirater le réseau sans fil. De quel type d'attaque s'agit-il ?",
+    "answerOptions": [
+      "Accès",
+      "Cheval de Troie",
+      "Reconnaissance",
+      "DoS"
+    ],
+    "correctAnswer": "Reconnaissance",
+    "rationale": "La première étape d'une attaque est souvent la **reconnaissance**. Cette phase consiste à collecter des informations sur une cible (dans ce cas, le réseau sans fil de l'entreprise) pour identifier ses vulnérabilités. Le fait que l'employé utilise des outils pour 'déterminer des informations' sur le réseau indique qu'il est dans cette phase de reconnaissance, avant de lancer une attaque réelle."
+  },
+  {
+    "question": "Un administrateur réseau cherche à préserver la confidentialité de l'ID utilisateur, du mot de passe et du contenu des sessions lorsqu'il configure une connexion distante CLI gérée par un commutateur. Quel est le mode d'accès le plus approprié ?",
+    "answerOptions": [
+      "SSH",
+      "AUX",
+      "Console",
+      "Telnet"
+    ],
+    "correctAnswer": "SSH",
+    "rationale": "**SSH** (Secure Shell) est le protocole le plus approprié pour une connexion distante sécurisée. Contrairement à Telnet, qui transmet les informations en texte clair, SSH utilise le chiffrement pour protéger l'ID utilisateur, le mot de passe et tout le contenu de la session. Les autres options, Console et AUX, sont utilisées pour des connexions locales et ne sont pas adaptées pour l'accès à distance sécurisé sur un réseau."
+  },
+  {
+    "question": "Un analyste de la cybersécurité estime qu'un attaquant annonce une fausse adresse MAC aux hôtes du réseau pour tenter d'usurper la passerelle par défaut. Quelle commande l'analyste pourrait-il utiliser sur les hôtes du réseau pour voir quelle adresse MAC les hôtes utilisés pour atteindre la passerelle par défaut ?",
+    "answerOptions": [
+      "arp -a",
+      "ipconfig / all",
+      "netsat -r",
+      "tracert"
+    ],
+    "correctAnswer": "arp -a",
+    "rationale": "L'attaque décrite est une usurpation d'ARP. La commande **arp -a** est l'outil de diagnostic parfait pour ce scénario. Elle affiche la table ARP (Address Resolution Protocol) d'un ordinateur, qui cartographie les adresses IP aux adresses MAC. En exécutant 'arp -a', l'analyste peut vérifier si l'adresse IP de la passerelle par défaut correspond à l'adresse MAC légitime, ou si elle a été détournée par une fausse adresse MAC."
+  },
+  {
+    "question": "En raison des contrôles de sécurité appliqués, un utilisateur ne peut accéder à un serveur qu'à l'aide du protocole FTP. Quel composant du modèle AAA effectue cela ?",
+    "answerOptions": [
+      "Autorisation",
+      "Audit",
+      "Traçabilité",
+      "Accessibilité",
+      "Authentification"
+    ],
+    "correctAnswer": "Autorisation",
+    "rationale": "Le modèle AAA se compose de l'Authentification, de l'**Autorisation** et de l'Audit (ou Comptabilité). Dans ce cas, le système vérifie d'abord l'identité de l'utilisateur (Authentification), puis détermine ce qu'il est autorisé à faire (Autorisation). Le fait que l'utilisateur ne puisse accéder au serveur que par FTP est un exemple de contrôle d'autorisation. Le système autorise une action spécifique, tout en en refusant d'autres."
+  },
+  {
+            "question": "Un technicien a été invité par un responsable pour qu'il lui recommande une solution de sécurité pour protéger un ordinateur contre les vers. Quelle technique de sécurité le technicien doit-il recommander ?",
+            "answerOptions": ["SSL", "Balayage", "ping", "IPS", "Antimalware"],
+            "correctAnswer": "Antimalware",
+            "rationale": "Un ver est un type de malware. La solution la plus appropriée pour se protéger contre les vers et d'autres logiciels malveillants est un logiciel antimalware, qui est spécifiquement conçu pour détecter, prévenir et supprimer ces menaces."
+          },
+          {
+    "question": "Quel est le moyen le plus efficace de sécuriser le trafic sans fil ?",
+    "answerOptions": [
+      "WPA2",
+      "Masquage SSID",
+      "WEP",
+      "Filtrage MAC sans fil"
+    ],
+    "correctAnswer": "WPA2",
+    "rationale": "WPA2 (Wi-Fi Protected Access 2) est un protocole de sécurité qui utilise un chiffrement fort, le protocole AES, pour protéger les réseaux sans fil. Il est considéré comme le plus efficace des options proposées pour sécuriser le trafic sans fil, offrant une protection supérieure par rapport au WEP, qui est obsolète et facile à pirater. Le masquage SSID et le filtrage MAC ne sont que des mesures de sécurité de base, facilement contournables."
+  },
+  {
+    "question": "Quelles sont les deux solutions de sécurité les plus susceptibles d'être utilisées uniquement dans un environnement d'entreprise ? (Choisissez deux réponses.)",
+    "answerOptions": [
+      "Antispyware",
+      "Réseaux privés virtuels (VPN)",
+      "Mots de passe forts",
+      "Systèmes de prévention des intrusions (IPS)",
+      "Logiciel antivirus"
+    ],
+    "correctAnswer": [
+      "Réseaux privés virtuels (VPN)",
+      "Systèmes de prévention des intrusions (IPS)"
+    ],
+    "rationale": "Les VPN (Réseaux Privés Virtuels) et les IPS (Systèmes de Prévention des Intrusions) sont des solutions de sécurité avancées, couramment utilisées dans les environnements d'entreprise pour protéger les données et les infrastructures. Bien que les particuliers puissent utiliser un VPN, les IPS sont presque exclusivement déployés dans les réseaux d'entreprise. Les mots de passe forts, l'antivirus et l'antispyware sont des mesures de sécurité essentielles pour tous les utilisateurs, tant particuliers qu'entreprises."
+  },
+  {
+    "question": "Comment la commande service password-encryption améliore-t-elle la sécurité des mots de passe sur des routeurs et des commutateurs Cisco ?",
+    "answerOptions": [
+      "Elle demande à l'utilisateur d'entrer des mots de passe chiffrés pour obtenir un accès à la console sur un routeur ou un commutateur.",
+      "Elle nécessite que des mots de passe soient utilisés lors d'une connexion distante à un routeur ou à un commutateur avec Telnet.",
+      "Elle chiffre les mots de passe qui sont stockés dans des fichiers de configuration de routeur et de commutateur.",
+      "Elle chiffre les mots de passe lorsqu'ils sont transmis sur le réseau."
+    ],
+    "correctAnswer": "Elle chiffre les mots de passe qui sont stockés dans des fichiers de configuration de routeur et de commutateur.",
+    "rationale": "La commande 'service password-encryption' est une fonction de sécurité de Cisco IOS. Elle ne chiffre pas les mots de passe lors de la transmission sur le réseau (ce qui est géré par des protocoles comme SSH), mais elle chiffre les mots de passe de type 'clear-text' (non chiffrés) dans les fichiers de configuration du routeur ou du commutateur. Cela empêche les mots de passe d'être lus en texte clair par des personnes ayant accès à ces fichiers de configuration."
+  },
+  {
+    "question": "Quel outil Windows peut être utilisé par un administrateur de cybersécurité pour sécuriser les ordinateurs autonomes qui ne font pas partie d'un domaine Active Directory ?",
+    "answerOptions": [
+      "Windows Defender",
+      "Stratégie de sécurité locale",
+      "fenêtre pare-feu",
+      "PowerShell"
+    ],
+    "correctAnswer": "Stratégie de sécurité locale",
+    "rationale": "La Stratégie de sécurité locale est l'outil approprié pour gérer les paramètres de sécurité sur des ordinateurs Windows autonomes qui ne sont pas gérés par une stratégie de groupe de domaine Active Directory. Cet outil permet de configurer des politiques de sécurité spécifiques à la machine, telles que la politique de mot de passe, les droits d'utilisateur et les paramètres d'audit."
+  },
+  {
+    "question": "Quelle technologie permet aux utilisateurs de vérifier l'identité d'un site web et de faire confiance au code téléchargé sur Internet ?",
+    "answerOptions": [
+      "Algorithme de clé asymétrique",
+      "Signature numérique",
+      "Chiffrement",
+      "Algorithme de hachage"
+    ],
+    "correctAnswer": "Signature numérique",
+    "rationale": "La signature numérique permet de garantir l'authenticité et l'intégrité des données, comme un site web ou un fichier. Elle utilise un algorithme de clé asymétrique pour créer une signature unique qui peut être vérifiée par l'utilisateur. C'est cette technologie qui est utilisée par les certificats SSL/TLS pour garantir que l'on se connecte au bon site web et que le code téléchargé n'a pas été modifié."
+  },
+          {
+            "question": "Parmi les exemples suivants, quel est celui qui illustre le cloud computing ?",
+            "answerOptions": ["Un style d'architecture Internet", "Une interaction continue entre les personnes, les processus, les données et les objets", "Un service offrant un accès à la demande aux ressources partagées", "Une infrastructure réseau répartie sur une vaste zone géographique"],
+            "correctAnswer": "Un service offrant un accès à la demande aux ressources partagées",
+            "rationale": "Le cloud computing est un modèle de livraison de services informatiques (ressources de calcul, stockage, applications) sur Internet à la demande, en utilisant un pool de ressources partagées qui peuvent être rapidement allouées et libérées."
+          },
+          {
+            "question": "Quelle déclaration décrit l'approche de détection des intrusions basée sur les anomalies ?",
+            "answerOptions": ["Il compare le fichier de définition antivirus à un référentiel basé sur le cloud pour les dernières mises à jour.", "Il compare les signatures du trafic entrant à une base de données d'intrusion connue.", "Il compare les opérations d'un hôte à une politique de sécurité bien définie.", "Il compare le comportement d'un hôte à une référence établie pour identifier les intrusions potentielles."],
+            "correctAnswer": "Il compare le comportement d'un hôte à une référence établie pour identifier les intrusions potentielles.",
+            "rationale": "La détection d'anomalies (ou IDS basé sur les anomalies) crée une ligne de base du comportement normal d'un système ou d'un réseau. Elle alerte ensuite l'administrateur lorsque des activités s'écartent de cette ligne de base, signalant une potentielle intrusion."
+          },
+  {
+    "question": "Quel est le terme utilisé lorsqu'une partie malveillante envoie un e-mail frauduleux déguisé comme provenant d'une source légitime et fiable ?",
+    "answerOptions": [
+      "Hameçonnage",
+      "porte arrière",
+      "troyen",
+      "vishing"
+    ],
+    "correctAnswer": "Hameçonnage",
+    "rationale": "L'**hameçonnage** (phishing en anglais) est une attaque par ingénierie sociale qui utilise des e-mails frauduleux. Ces e-mails semblent provenir de sources fiables (comme une banque, un fournisseur de services, ou une entreprise) pour inciter les victimes à divulguer des informations sensibles comme des mots de passe, des numéros de carte de crédit, ou des informations personnelles."
+  },
+  {
+    "question": "L'adresse IPv4 a combien de bits ?",
+    "answerOptions": [
+      "4",
+      "128",
+      "64",
+      "32"
+    ],
+    "correctAnswer": "32",
+    "rationale": "L'adresse **IPv4** est une adresse de 32 bits, généralement représentée sous la forme de quatre octets (chacun de 8 bits) séparés par des points. Cela offre environ 4,3 milliards d'adresses uniques, une quantité qui s'est avérée insuffisante, menant au développement de l'IPv6."
+  },
+  {
+    "question": "Pour la saisie d'informations personnelles lors d'un achat en ligne, je vérifie la sécurisation du site grâce au protocole...",
+    "answerOptions": [
+      "HTTP",
+      "FTP",
+      "TCP/IP",
+      "HTTPS"
+    ],
+    "correctAnswer": "HTTPS",
+    "rationale": "Le protocole **HTTPS** (Hypertext Transfer Protocol Secure) est la version sécurisée de HTTP. Il utilise le chiffrement pour protéger les données échangées entre le navigateur de l'utilisateur et le site web. C'est le protocole indispensable à utiliser pour les transactions en ligne et la saisie d'informations personnelles, car il garantit leur confidentialité."
+  },
+  {
+    "question": "Quels sont les 2 instructions qui définissent les commandes Ping et Tracert ?",
+    "answerOptions": [
+      "Traceroute ou Tracert n'utilise pas des adresses IP",
+      "Ping permet de tester la connectivité IP avec une destinataire et il affiche uniquement une réponse de destination",
+      "Ping est utilisé pour tracer l'itinéraire vers la destination",
+      "Traceroute ou Tracert permet d'afficher chaque saut sur le chemin vers la destination et il est utilisé pour tracer l'itinéraire vers la destination"
+    ],
+    "correctAnswer": [
+      "Ping permet de tester la connectivité IP avec une destinataire et il affiche uniquement une réponse de destination",
+      "Traceroute ou Tracert permet d'afficher chaque saut sur le chemin vers la destination et il est utilisé pour tracer l'itinéraire vers la destination"
+    ],
+    "rationale": "Les commandes **Ping** et **Tracert** (ou Traceroute) servent toutes deux à diagnostiquer les problèmes de réseau, mais de manière différente. Ping envoie un paquet à une destination et vérifie sa réponse pour confirmer la connectivité. Tracert, quant à lui, trace le chemin que prend le paquet pour atteindre sa destination en affichant chaque 'saut' (chaque routeur) sur le chemin. Ces commandes sont complémentaires et essentielles pour l'administration réseau."
+  },
+  {
+    "question": "Dans le cadre d'une approche de défense en profondeur multicouche, quel périphérique refuse les connexions aux réseaux internes établies depuis des réseaux non fiables, mais autorise les utilisateurs internes de l'entreprise à se connecter à des réseaux de ce type ?",
+    "answerOptions": [
+      "IPS",
+      "Routeur interne",
+      "Commutateur de couche d'accès",
+      "Pare-feu"
+    ],
+    "correctAnswer": "Pare-feu",
+    "rationale": "Un **pare-feu** est un composant de sécurité réseau qui contrôle le trafic entrant et sortant en fonction de règles prédéfinies. Sa fonction principale est de protéger le réseau interne contre les menaces externes. Il bloque généralement les connexions non sollicitées venant de l'extérieur (réseaux non fiables) tout en permettant aux utilisateurs internes d'accéder à l'Internet (réseaux non fiables), ce qui correspond parfaitement à la description de l'énoncé."
+  },
+  {
+    "question": "Quelle affirmation décrit un facteur à prendre en compte lors de la configuration d'un pare-feu de politique basé sur les zones ?",
+    "answerOptions": [
+      "Une zone doit être configurée avec la commande zone security globale avant de pouvoir être utilisée dans la commande zone-member security.",
+      "La commande classique de firewal l ip inspect peut coexister avec ZPF tant qu'elle est utilisée sur des interfaces qui se trouvent dans les mêmes zones de sécurité.",
+      "Une interface ne peut pas appartenir à plusieurs zones.",
+      "Le routeur filtre toujours le trafic entre les interfaces dans la même zone."
+    ],
+    "correctAnswer": "Une interface ne peut pas appartenir à plusieurs zones.",
+    "rationale": "Un aspect essentiel de la configuration d'un pare-feu basé sur les zones (Zone-Based Policy Firewall, ZPF) est que chaque interface physique ou virtuelle ne peut être membre que d'une seule zone à la fois. Cela permet de définir des politiques de sécurité claires et d'appliquer des règles de filtrage précises pour le trafic entrant et sortant de chaque zone."
+  },
+  {
+    "question": "Quels sont les trois périphériques généralement utilisé dans un réseau polyvalent ?",
+    "answerOptions": [
+      "Routeur",
+      "Serveur Web",
+      "Commutateur",
+      "Point d'accès sans fil",
+      "Serveur d'imprimante"
+    ],
+    "correctAnswer": [
+      "Routeur",
+      "Commutateur",
+      "Point d'accès sans fil"
+    ],
+    "rationale": "Un réseau polyvalent (ou typique) a besoin de plusieurs types d'appareils pour fonctionner. Le **routeur** connecte le réseau interne à d'autres réseaux (comme Internet). Le **commutateur** connecte plusieurs appareils sur le même réseau local et le **point d'accès sans fil** permet aux appareils de se connecter au réseau sans fil. Les serveurs sont aussi présents sur les réseaux, mais un réseau a absolument besoin des trois autres pour communiquer et fonctionner."
+  },
+  {
+    "question": "Quel périphérique constitue généralement la première ligne de défense dans une approche de défense en profondeur multicouche ?",
+    "answerOptions": [
+      "Commutateur de couche d'accès",
+      "Pare-feu",
+      "Routeur interne",
+      "Routeur de périphérie"
+    ],
+    "correctAnswer": "Routeur de périphérie",
+    "rationale": "Dans une approche de sécurité de **défense en profondeur**, le **routeur de périphérie** (ou 'edge router') est souvent la première ligne de défense. Il se trouve à la frontière entre le réseau interne de l'entreprise et le réseau externe (Internet). Il est généralement configuré pour bloquer le trafic malveillant et les attaques venant de l'extérieur avant même qu'ils n'atteignent le reste du réseau. Le pare-feu est aussi une première ligne de défense, souvent intégré au routeur de périphérie."
+  },
+  {
+    "question": "Lors de l'application d'une ACL sur une interface de routeur, quel trafic est désigné comme sortant ?",
+    "answerOptions": [
+      "Trafic qui va de l'adresse IP de destination vers le routeur",
+      "Trafic pour lequel le routeur ne peut trouver aucune entrée de table de routage",
+      "Trafic qui quitte le routeur et va vers l'hôte de destination",
+      "Trafic provenant de l'adresse IP source dans le routeur"
+    ],
+    "correctAnswer": "Trafic qui quitte le routeur et va vers l'hôte de destination",
+    "rationale": "Une **ACL** (Access Control List) peut être appliquée sur une interface de routeur pour filtrer le trafic. Le trafic est désigné comme **sortant** (outbound) lorsqu'il **quitte le routeur** par une interface donnée pour se diriger vers sa destination finale. Le trafic qui arrive sur une interface du routeur est considéré comme entrant (inbound)."
+  },
+  {
+    "question": "Un technicien réussit à envoyer une requête ping pour l'adresse IP du serveur d'une entreprise distante, mais pas pour l'adresse URL de ce même serveur web. Quelle commande doit-il exécuter pour diagnostiquer ce problème ?",
+    "answerOptions": [
+      "tracert",
+      "nslookup",
+      "ipconfig",
+      "netstat"
+    ],
+    "correctAnswer": "nslookup",
+    "rationale": "Le fait de pouvoir 'ping' l'adresse IP mais pas l'URL indique que la connectivité au serveur est bonne, mais que la résolution du nom de domaine ne fonctionne pas. La commande **nslookup** (name server lookup) est l'outil de diagnostic standard pour interroger les serveurs DNS et vérifier si la résolution du nom de domaine en adresse IP fonctionne correctement. C'est l'outil parfait pour identifier les problèmes de DNS."
+  },
+  {
+    "question": "Quelles sont les deux solutions de sécurité les plus susceptibles d'être utilisées uniquement dans un environnement d'entreprise ?",
+    "answerOptions": [
+      "Antispyware",
+      "Réseaux privés virtuels (VPN)",
+      "Mots de passe forts",
+      "Systèmes de prévention des intrusions (IPS)",
+      "Logiciel antivirus"
+    ],
+    "correctAnswer": [
+      "Réseaux privés virtuels (VPN)",
+      "Systèmes de prévention des intrusions (IPS)"
+    ],
+    "rationale": "Bien que le VPN et les mots de passe forts soient utilisés aussi bien à la maison que dans les entreprises, les **systèmes de prévention des intrusions (IPS)** sont des équipements de sécurité réseau sophistiqués qui surveillent activement le trafic pour bloquer les menaces en temps réel. Cette technologie est généralement trop complexe et coûteuse pour un usage domestique et est principalement réservée aux environnements d'entreprise. De même, les **réseaux privés virtuels (VPN)** sont une solution courante pour les employés d'une entreprise souhaitant accéder de manière sécurisée au réseau interne depuis un site distant."
+  },
+  {
+    "question": "Quels sont les 3 éléments de la configuration IP qui doivent être correctement paramétrés pour qu'un appareil (hôte) puisse envoyer et recevoir des données sur le réseau ?",
+    "answerOptions": [
+      "L'adresse IP",
+      "Le commutateur",
+      "Le masque de sous-réseau",
+      "Le routeur",
+      "La passerelle par défaut"
+    ],
+    "correctAnswer": [
+      "L'adresse IP",
+      "Le masque de sous-réseau",
+      "La passerelle par défaut"
+    ],
+    "rationale": "Pour qu'un appareil communique sur un réseau IP, il a besoin de trois informations de configuration essentielles : son **adresse IP** (son identifiant unique sur le réseau), le **masque de sous-réseau** (qui définit la partie de l'adresse IP qui identifie le réseau), et la **passerelle par défaut** (l'adresse du routeur qui sert de porte de sortie vers d'autres réseaux, y compris Internet)."
+  },
+  {
+    "question": "Quelle technique le personnel de sécurité pourrait-il utiliser pour analyser un fichier suspect dans un environnement sûr ?",
+    "answerOptions": [
+      "liste blanche",
+      "ligne de base",
+      "liste noire",
+      "bac à sable"
+    ],
+    "correctAnswer": "bac à sable",
+    "rationale": "Un **bac à sable** (sandbox en anglais) est un environnement isolé, sûr et virtuel qui permet au personnel de sécurité d'exécuter un programme ou d'ouvrir un fichier suspect sans risquer d'infecter le système hôte ou le reste du réseau. C'est un outil essentiel pour l'analyse des malwares et des menaces inconnues."
+  },
+  {
+    "question": "Quels sont les 3 types d'informations qui sont transmises à partir du réseau ?",
+    "answerOptions": [
+      "Les Données",
+      "La Voix",
+      "Les Ondes Radio",
+      "La Vidéo"
+    ],
+    "correctAnswer": [
+      "Les Données",
+      "La Voix",
+      "La Vidéo"
+    ],
+    "rationale": "Le réseau est conçu pour gérer plusieurs types de flux d'informations. Les **Données** sont le trafic le plus courant (fichiers, e-mails, pages web). La **Voix** (téléphonie sur IP) et la **Vidéo** (streaming, visioconférence) sont des types d'informations qui demandent une gestion particulière du réseau pour assurer une bonne qualité de service (faible latence et bande passante stable)."
+  },
+  {
+    "question": "Quel type d'ACL offre une grande flexibilité et un meilleur contrôle sur l'accès au réseau ?",
+    "answerOptions": [
+      "Flexible",
+      "Étendu",
+      "Norme numérotée",
+      "Norme nommée"
+    ],
+    "correctAnswer": "Étendu",
+    "rationale": "Les **listes de contrôle d'accès étendues (ACL étendues)** offrent la plus grande flexibilité et un contrôle plus précis sur le trafic réseau. Elles permettent de filtrer les paquets en se basant sur l'adresse IP source et de destination, les ports source et de destination, ainsi que le protocole (TCP, UDP, ICMP), ce qui n'est pas possible avec les ACL standard qui ne filtrent que l'adresse IP source."
+  },
+  {
+    "question": "Quels sont les éléments qui sont collectivement appelés supports réseau ?",
+    "answerOptions": [
+      "Le Câble cuivre",
+      "Le Commutateur",
+      "Le Routeur",
+      "La Fibre optique"
+    ],
+    "correctAnswer": [
+      "Le Câble cuivre",
+      "La Fibre optique"
+    ],
+    "rationale": "Les **supports réseau** font référence aux médias physiques qui transportent les signaux de données. Les principaux supports filaires sont le **câble cuivre** (comme les câbles Ethernet) et la **fibre optique**. Les ondes radio sont le support pour les connexions sans fil. Les commutateurs et les routeurs sont des équipements réseau actifs, et non des supports."
+  },
+  {
+    "question": "Quel type de pare-feu a généralement un faible impact sur les performances du réseau ?",
+    "answerOptions": [
+      "Pare-feu dynamique",
+      "Pare-feu de nouvelle génération",
+      "Pare-feu sans état",
+      "Pare-feu passerelle d'application"
+    ],
+    "correctAnswer": "Pare-feu sans état",
+    "rationale": "Un **pare-feu sans état** (stateless firewall) est un pare-feu basique qui examine chaque paquet de manière isolée, sans se souvenir des paquets précédents de la même connexion. Ce manque de contexte rend le processus de filtrage très rapide, ce qui a un **faible impact sur les performances** du réseau. En revanche, les pare-feux avec état ou de nouvelle génération effectuent une analyse plus poussée et sont donc plus exigeants en ressources, ce qui peut impacter les performances."
+  },
+  {
+    "question": "Pourquoi attribue-t-on une adresse IP à l'interface VLAN1 sur un commutateur de couche 2 Cisco ?",
+    "answerOptions": [
+      "Pour créer un nouveau réseau local IP sur le commutateur",
+      "Pour permettre le transfert de paquets IP par le commutateur",
+      "Pour autoriser l'accès à distance au commutateur afin de le gérer",
+      "Pour permettre au commutateur d'acheminer les paquets entre des réseaux"
+    ],
+    "correctAnswer": "Pour autoriser l'accès à distance au commutateur afin de le gérer",
+    "rationale": "Un commutateur de couche 2 opère au niveau de la couche liaison de données et ne nécessite pas d'adresse IP pour transférer les trames entre les hôtes d'un même réseau. Cependant, pour qu'un administrateur puisse accéder et configurer le commutateur à distance (par exemple via Telnet ou SSH), une adresse IP de gestion est indispensable. Cette adresse est généralement attribuée à l'interface de gestion virtuelle, souvent l'interface **VLAN1**."
+  },
+  {
+    "question": "Lorsqu'un hacker accède au réseau, quatre types de menaces sont possibles, lesquelles :",
+    "answerOptions": [
+      "Vol d'informations",
+      "Usurpation d'identité",
+      "Perte/manipulation des données",
+      "Hameçonnage",
+      "Interruption de service"
+    ],
+    "correctAnswer": [
+      "Vol d'informations",
+      "Perte/manipulation des données",
+      "Interruption de service"
+    ],
+    "rationale": "Une fois qu'un hacker a accédé à un réseau, il peut s'engager dans diverses activités malveillantes. Les menaces principales incluent le **vol d'informations** (données personnelles, financières, etc.), la **perte/manipulation des données** (effacer ou altérer des fichiers), et l'**interruption de service** (rendre les systèmes indisponibles pour les utilisateurs légitimes). L'usurpation d'identité est un résultat possible du vol d'informations, mais n'est pas un type de menace en soi dans ce contexte, et l'hameçonnage est une technique utilisée pour obtenir un accès, pas une menace qui s'applique après l'accès."
+  }
+        ];
+
+        // Éléments du DOM
+        const questionText = document.getElementById('question-text');
+        const answerButtons = document.getElementById('answer-buttons');
+        const nextBtn = document.getElementById('next-btn');
+        const feedbackSection = document.getElementById('feedback-section');
+        const feedbackText = document.getElementById('feedback-text');
+        const rationaleText = document.getElementById('rationale-text');
+        const scoreDisplay = document.getElementById('score-display');
+        const questionCountDisplay = document.getElementById('question-count-display');
+        const endQuizModal = document.getElementById('end-quiz-modal');
+        const finalScore = document.getElementById('final-score');
+        const restartBtn = document.getElementById('restart-btn');
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let isAnswerChecked = false;
+        let userSelectedAnswers = [];
+
+        // Fonction pour démarrer le quiz
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            isAnswerChecked = false;
+            endQuizModal.classList.add('hidden');
+            document.getElementById('quiz-container').classList.remove('hidden');
+            scoreDisplay.textContent = `Score: ${score}`;
+            nextBtn.textContent = 'Vérifier la réponse';
+            showQuestion();
+        }
+
+        // Fonction pour afficher la question actuelle
+        function showQuestion() {
+            const currentQuestion = questions[currentQuestionIndex];
+            const isMultipleChoice = Array.isArray(currentQuestion.correctAnswer);
+
+            questionText.textContent = currentQuestion.question;
+            questionCountDisplay.textContent = `Question ${currentQuestionIndex + 1}/${questions.length}`;
+            answerButtons.innerHTML = '';
+            feedbackSection.classList.add('hidden');
+            nextBtn.disabled = true; // Désactive le bouton "Suivant" tant qu'une réponse n'est pas sélectionnée
+            userSelectedAnswers = [];
+
+            // Créer les boutons de réponse (radio ou checkbox)
+            currentQuestion.answerOptions.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add(
+                    'bg-gray-700', 'hover:bg-gray-600', 'text-left', 'py-3', 'px-6',
+                    'rounded-xl', 'transition-colors', 'duration-200', 'w-full',
+                    'focus:ring-2', 'focus:ring-indigo-500', 'focus:ring-offset-2', 'focus:ring-offset-gray-800'
+                );
+
+                if (isMultipleChoice) {
+                    // Pour les questions à choix multiples, utiliser des checkboxes visuelles
+                    button.dataset.index = index;
+                    button.addEventListener('click', () => {
+                        button.classList.toggle('bg-indigo-600');
+                        button.classList.toggle('bg-gray-700');
+                        button.classList.toggle('hover:bg-gray-600');
+                        const isSelected = button.classList.contains('bg-indigo-600');
+                        if (isSelected) {
+                            userSelectedAnswers.push(option);
+                        } else {
+                            userSelectedAnswers = userSelectedAnswers.filter(ans => ans !== option);
+                        }
+                        nextBtn.disabled = userSelectedAnswers.length === 0;
+                    });
+                } else {
+                    // Pour les questions à choix unique
+                    button.dataset.index = index;
+                    button.addEventListener('click', () => {
+                        // Désélectionner les autres boutons
+                        Array.from(answerButtons.children).forEach(btn => {
+                            btn.classList.remove('bg-indigo-600');
+                        });
+                        // Sélectionner le bouton cliqué
+                        button.classList.add('bg-indigo-600');
+                        userSelectedAnswers = [option];
+                        nextBtn.disabled = false;
+                    });
+                }
+                answerButtons.appendChild(button);
+            });
+        }
+
+        // Fonction pour vérifier la réponse
+        function checkAnswer() {
+            if (isAnswerChecked) return;
+
+            isAnswerChecked = true;
+            const currentQuestion = questions[currentQuestionIndex];
+            const isMultipleChoice = Array.isArray(currentQuestion.correctAnswer);
+
+            let isCorrect = false;
+            let correctAnswers = Array.isArray(currentQuestion.correctAnswer) ? currentQuestion.correctAnswer : [currentQuestion.correctAnswer];
+
+            if (isMultipleChoice) {
+                // Vérification pour choix multiples
+                isCorrect = userSelectedAnswers.length === correctAnswers.length &&
+                            userSelectedAnswers.every(ans => correctAnswers.includes(ans));
+            } else {
+                // Vérification pour choix unique
+                isCorrect = userSelectedAnswers.length === 1 && userSelectedAnswers[0] === correctAnswers[0];
+            }
+
+            // Mettre à jour le score et l'affichage
+            if (isCorrect) {
+                score++;
+                feedbackText.textContent = 'Correct ! 🎉';
+                feedbackText.classList.remove('text-red-400');
+                feedbackText.classList.add('text-green-400');
+            } else {
+                feedbackText.textContent = 'Incorrect. 😕';
+                feedbackText.classList.remove('text-green-400');
+                feedbackText.classList.add('text-red-400');
+            }
+
+            scoreDisplay.textContent = `Score: ${score}`;
+            rationaleText.textContent = `Justification: ${currentQuestion.rationale}`;
+            feedbackSection.classList.remove('hidden');
+
+            // Mettre en surbrillance les réponses
+            Array.from(answerButtons.children).forEach(button => {
+                const buttonText = button.textContent;
+                const isSelectedByUser = userSelectedAnswers.includes(buttonText);
+                const isCorrectOption = correctAnswers.includes(buttonText);
+                button.disabled = true; // Désactive les boutons après la vérification
+
+                if (isCorrectOption) {
+                    button.classList.add('bg-green-600');
+                } else if (isSelectedByUser && !isCorrectOption) {
+                    button.classList.add('bg-red-600');
+                }
+                button.classList.remove('hover:bg-gray-600');
+            });
+            
+            // Changer le texte du bouton et activer la navigation
+            nextBtn.textContent = 'Question suivante';
+            nextBtn.disabled = false;
+        }
+
+        // Fonction pour passer à la question suivante
+        function nextQuestion() {
+            if (!isAnswerChecked) {
+                checkAnswer();
+                return;
+            }
+
+            currentQuestionIndex++;
+            isAnswerChecked = false;
+
+            if (currentQuestionIndex < questions.length) {
+                nextBtn.textContent = 'Vérifier la réponse';
+                showQuestion();
+            } else {
+                endQuiz();
+            }
+        }
+
+        // Fonction pour afficher l'écran de fin de quiz
+        function endQuiz() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            endQuizModal.classList.remove('hidden');
+            finalScore.textContent = `Votre score final est de: ${score}/${questions.length}`;
+        }
+
+        // Événements
+        nextBtn.addEventListener('click', nextQuestion);
+        restartBtn.addEventListener('click', startQuiz);
+
+        // Démarrer le quiz au chargement de la page
+        document.addEventListener('DOMContentLoaded', startQuiz);
+    </script>
+</body>
+</html>
+
